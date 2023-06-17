@@ -248,6 +248,10 @@
             const startXat = 150;
             const startYat = 50;
 
+            data.forEach((d)=>{
+                d.total = d.rendah_count + d.menengah_count + d.belia_count
+            });
+
             // Calculate the maximum value for the scale
             const maxCount = d3.max(data, d => d.belia_count + d.menengah_count + d.rendah_count);
 
@@ -271,7 +275,7 @@
 
             // Create a group for each data point
             const groups = svg.selectAll("g")
-            .data(data)
+            .data(data.sort((a,b)=>a-b))
             .enter()
             .append("g")
             .attr("transform", (d, i) => `translate(0, ${startYat + (i * (barHeight + verticalGap))})`);
