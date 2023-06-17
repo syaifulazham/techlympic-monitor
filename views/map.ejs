@@ -285,7 +285,7 @@
             .attr("x", 0)
             .attr("y", barHeight / 2)
             .attr("dominant-baseline", "middle")
-            .text(d => d.negeri);
+            .text(d => d.negeri.replace('WILAYAH PERSEKUTUAN ','').length >= 16 ? d.negeri.replace('WILAYAH PERSEKUTUAN ','').substring(0,15) : d.negeri.replace('WILAYAH PERSEKUTUAN ',''));
 
             // Add the stacked bars
             groups.append("rect")
