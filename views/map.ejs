@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Map</title>
+    <!-- Include Leaflet CSS and JavaScript files -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="monitor.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
+    
+
+</head>
+
+<body>
+    <div id="map"></div>
+    <!-- Add a container for the stacked bar graph -->
+    <div id="histogram-daily"></div>
+    <!-- Add a container for the stacked bar graph -->
+    <div id="chart-container"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script>
+        var api = {
+            count: {
+                users(fn){
+                $.ajax({
+                        type: "POST",
+                        url: '/api/count/users',
+                        data: {},
+                        success: function (res) {
+                            
+                            fn(res);
+                        },
+                        dataType: 'json'
+                    });
+                },
+                daily(fn){
+                $.ajax({
+                        type: "POST",
+                        url: '/api/count/daily',
+                        data: {},
+                        success: function (res) {
+                            
+                            fn(res);
+                        },
+                        dataType: 'json'
+                    });
+                },
+            }
+        }
+    </script>
+
+    <script>
+        // Create the Leaflet map
+        var map = L.map('map').setView([4.2105, 101.9758], 6);
+
+        function renderMap(){
+            api.count.users((data=>{
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+                maxZoom: 18,
+                }).addTo(map);
+
+                // Iterate over the data array and add markers to the map
+                data.forEach(function(item) {
+                    L.circleMarker([item.y, item.x], { radius: 10 }).addTo(map);
+                });
+
+                byNegeri(data);
+                byDaily();
+                createReset();
+
+            }));
+        } 
+
+        function byDaily(){
+            api.count.daily((dd)=>{
+                
+                // Find min and max dates
+                const dates = dd.map(entry => new Date(entry.dt));
+                const minDate = new Date(
+                    Math.min(
+                        ...dd.map(el => {
+                        return new Date(el.dt);
+                        }),
+                    ),
+                );
+                const maxDate = new Date(
+                    Math.max(
+                        ...dd.map(el => {
+                        return new Date(el.dt);
+                        }),
+                    ),
+                );
+
+                console.log(dd);
+
+                // Generate array with all dates between min and max
+                const data = [];
+                let currentDate = new Date(minDate);
+                console.log('currentDate ',minDate,maxDate);
+                while (currentDate <= maxDate) {
+                    const formattedDate = currentDate.toISOString().split("T")[0];
+                    const entry = dd.find(item => item.dt.substring(0,10) === formattedDate);
+                    const registered = entry ? entry.total : 0;
+                    data.push({ date: new Date(formattedDate), registered });
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                console.log(data);
+
+                const chartTitle = "PENDAFTARAN HARIAN";
+                const containerWidth = window.innerWidth - 150;
+                const containerHeight = 200;
+                const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+                const chartWidth = containerWidth - margin.left - margin.right;
+                const chartHeight = containerHeight - margin.top - margin.bottom;
+
+                // Parse the date string to Date object
+                const parseDate = d3.timeParse("%Y-%m-%d");
+
+                // Format the date as desired on the x-axis
+                const formatDate = d3.timeFormat("%d-%b");
+
+                // Create the SVG container
+                const svg = d3.select("#histogram-daily")
+                .append("svg")
+                .attr("width", containerWidth)
+                .attr("height", containerHeight);
+
+                // Add the chart title
+                svg.append("text")
+                .attr("x", containerWidth / 2)
+                .attr("y", 30)
+                .attr("text-anchor", "middle")
+                .text(chartTitle);
+
+                // Create a group for the chart
+                const chart = svg.append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+                // Create the x-scale
+                const xScale = d3.scaleBand()
+                .domain(data.map(d => d.date))
+                .range([0, chartWidth])
+                .padding(0.1);
+
+                // Create the y-scale
+                const yScale = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.registered)])
+                .range([chartHeight, 0]);
+
+                // Create the x-axis
+                const xAxis = d3.axisBottom(xScale)
+                .tickFormat(formatDate);
+
+                // Create the y-axis
+                const yAxis = d3.axisLeft(yScale);
+
+                // Add the x-axis to the chart
+                chart.append("g")
+                .attr("transform", `translate(0,${chartHeight})`)
+                .call(xAxis);
+
+                // Add the y-axis to the chart
+                chart.append("g")
+                .call(yAxis);
+
+                // Create the histogram bars
+                chart.selectAll(".bar-histo")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("class", "bar-histo")
+                .attr("x", d => xScale(d.date))
+                .attr("y", d => yScale(d.registered))
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => chartHeight - yScale(d.registered));
+            });
+        }
+
+        function createReset(){
+            // Create the reset button using jQuery and add it to the map
+            var resetButton = L.control({ position: 'topright' });
+            resetButton.onAdd = function () {
+                var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                $(div).html('<button id="resetButton" class="btn btn-primary">Reset View</button>');
+                $(div).on('click', '#resetButton', function () {
+                    map.setView([4.2105, 101.9758], 6);
+                });
+                return div;
+            };
+            resetButton.addTo(map);
+        }
+
+        function byNegeri(data){
+            // Assuming you have loaded the data into the `data` array
+            // Define the aggregate array
+            var aggregate_by_negeri = [];
+
+            // Iterate over the data array and perform the aggregation
+            data.forEach(function(item) {
+                var negeri = item.negeri;
+
+                // Check if the negeri already exists in the aggregate array
+                var existingData = aggregate_by_negeri.find(function(aggregatedItem) {
+                    return aggregatedItem.negeri === negeri;
+                });
+
+                // If negeri exists, increment the count for the respective peringkat
+                if (existingData) {
+                    if (item.peringkat === 'Rendah') {
+                    existingData.rendah_count++;
+                    } else if (item.peringkat === 'Menengah') {
+                    existingData.menengah_count++;
+                    } else if (item.peringkat === 'Belia') {
+                    existingData.belia_count++;
+                    }
+                } else {
+                    // If negeri does not exist, create a new entry with initial counts
+                    var newData = {
+                    negeri: negeri,
+                    rendah_count: item.peringkat === 'Rendah' ? 1 : 0,
+                    menengah_count: item.peringkat === 'Menengah' ? 1 : 0,
+                    belia_count: item.peringkat === 'Belia' ? 1 : 0
+                    };
+                    aggregate_by_negeri.push(newData);
+                }
+            });
+
+            // The `aggregate_by_negeri` array now contains the aggregated data per negeri
+            console.log(aggregate_by_negeri);
+            renderByNegeri(aggregate_by_negeri);
+        }
+        //
+
+        function renderByNegeri(data){
+            const chartTitle = "JUMLAH PENDAFTARAN MENGIKUT NEGERI";
+            const containerWidth = 200;
+            const barHeight = 20;
+            const verticalGap = 2;
+            const startXat = 150;
+            const startYat = 50;
+
+            // Calculate the maximum value for the scale
+            const maxCount = d3.max(data, d => d.belia_count + d.menengah_count + d.rendah_count);
+
+            // Create the scale for the x-axis
+            const xScale = d3.scaleLinear()
+            .domain([0, maxCount])
+            .range([0, containerWidth]);
+
+            // Create the SVG container
+            const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", "100%")
+            .attr("height", ((barHeight + verticalGap) * data.length) + startYat);
+
+            // Add the chart title
+            svg.append("text")
+            .attr("x", 0)
+            .attr("y", 30)
+            .attr("text-anchor", "start")
+            .text(chartTitle);
+
+            // Create a group for each data point
+            const groups = svg.selectAll("g")
+            .data(data)
+            .enter()
+            .append("g")
+            .attr("transform", (d, i) => `translate(0, ${startYat + (i * (barHeight + verticalGap))})`);
+
+            // Add the category label on the left
+            groups.append("text")
+            .attr("x", 0)
+            .attr("y", barHeight / 2)
+            .attr("dominant-baseline", "middle")
+            .text(d => d.negeri);
+
+            // Add the stacked bars
+            groups.append("rect")
+            .attr("x", startXat)
+            .attr("y", 0)
+            .attr("width", d => xScale(d.belia_count))
+            .attr("height", barHeight)
+            .attr("fill", "blue");
+
+            groups.append("rect")
+            .attr("x", d => xScale(d.belia_count)+ startXat)
+            .attr("y", 0)
+            .attr("width", d => xScale(d.menengah_count))
+            .attr("height", barHeight)
+            .attr("fill", "green");
+
+            groups.append("rect")
+            .attr("x", d => xScale(d.belia_count + d.menengah_count) + startXat)
+            .attr("y", 0)
+            .attr("width", d => xScale(d.rendah_count))
+            .attr("height", barHeight)
+            .attr("fill", "red");
+
+            groups.append("text")
+            .attr("x", d => (xScale(d.belia_count + d.menengah_count + d.rendah_count) + startXat + 6))
+            .attr("y", (barHeight / 2) + 5)
+            .attr("text-anchor", "start")
+            .text(d => (d.belia_count + d.menengah_count + d.rendah_count));
+
+        }
+        
+    </script>
+
+
+    <!-- Add the script to render the stacked bar graph -->
+    <script>
+        renderMap();
+    </script>
+</body>
+
+</html>
