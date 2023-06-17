@@ -275,7 +275,7 @@
 
             // Create a group for each data point
             const groups = svg.selectAll("g")
-            .data(data.sort((a,b)=>a.total-b.total))
+            .data(data.sort((a,b)=>b.total-a.total))
             .enter()
             .append("g")
             .attr("transform", (d, i) => `translate(0, ${startYat + (i * (barHeight + verticalGap))})`);
