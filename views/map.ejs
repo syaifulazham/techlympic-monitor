@@ -308,21 +308,21 @@
             .attr("y", 0)
             .attr("width", d => xScale(d.belia_count))
             .attr("height", barHeight)
-            .attr("fill", "blue");
+            .attr("fill", "#f538c6");
 
             groups.append("rect")
             .attr("x", d => xScale(d.belia_count)+ startXat)
             .attr("y", 0)
             .attr("width", d => xScale(d.menengah_count))
             .attr("height", barHeight)
-            .attr("fill", "green");
+            .attr("fill", "#3864f5");
 
             groups.append("rect")
             .attr("x", d => xScale(d.belia_count + d.menengah_count) + startXat)
             .attr("y", 0)
             .attr("width", d => xScale(d.rendah_count))
             .attr("height", barHeight)
-            .attr("fill", "red");
+            .attr("fill", "#38c9f5");
 
             groups.append("text")
             .attr("x", d => (xScale(d.belia_count + d.menengah_count + d.rendah_count) + startXat + 6))
