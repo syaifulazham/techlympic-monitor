@@ -113,6 +113,11 @@
                     currentDate.setDate(currentDate.getDate() + 1);
                 }
 
+                var total = 0;
+                data.forEach(d=>{
+                    total += d.registered;
+                });
+
                 console.log(data);
 
                 const chartTitle = "PENDAFTARAN HARIAN";
@@ -139,7 +144,16 @@
                 .attr("x", containerWidth / 2)
                 .attr("y", 30)
                 .attr("text-anchor", "middle")
+                .attr('class','capsule')
                 .text(chartTitle);
+
+                // Add the chart title
+                svg.append("text")
+                .attr("x", containerWidth / 2)
+                .attr("y", 50)
+                .attr("text-anchor", "middle")
+                .attr('class','capsule')
+                .text('Jumlah Pengguna terkini: ' + total);
 
                 // Create a group for the chart
                 const chart = svg.append("g")
@@ -271,6 +285,7 @@
             .attr("x", 0)
             .attr("y", 30)
             .attr("text-anchor", "start")
+            .attr('class','capsule')
             .text(chartTitle);
 
             // Create a group for each data point
