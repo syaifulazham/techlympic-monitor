@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ChatGPT Example</title>
+</head>
+<body>
+  <h1>ChatGPT Example</h1>
+  
+  <form action="/chat" method="post">
+    <input type="text" name="message" placeholder="Type your message" required>
+    <button type="submit">Send</button>
+  </form>
+  
+  <% if (message) { %>
+    <p>You: <%= message %></p>
+    <p>Assistant: <%= reply %></p>
+  <% }%>
+</body>
+</html>
