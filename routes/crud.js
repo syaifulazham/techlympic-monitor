@@ -141,7 +141,7 @@ let API = {
                     pelawat regexp 'Guru' and 
                     date(CONVERT_TZ(updatedate, 'America/New_York', 'Asia/Kuala_Lumpur')) = date(CONVERT_TZ(CURRENT_TIMESTAMP(), 'America/New_York', 'Asia/Kuala_Lumpur'))
                 union 
-                SELECT 'Pelajar', sum(ifnull(bilpelajar,0))+200 + sum(if(pelawat regexp 'Sekolah',1,0)) Jumlah  
+                SELECT 'Pelajar', sum(ifnull(bilpelajar,0)) + sum(if(pelawat regexp 'Sekolah',1,0)) Jumlah  
                 FROM azhamezcute_logdb.events_visitors a 
                 WHERE eventid = ? AND 
                     nama <> '' and
@@ -177,7 +177,7 @@ let API = {
                     pelawat regexp 'Guru' and 
                     date(CONVERT_TZ(updatedate, 'America/New_York', 'Asia/Kuala_Lumpur')) = date(CONVERT_TZ(CURRENT_TIMESTAMP(), 'America/New_York', 'Asia/Kuala_Lumpur'))
                 union 
-                SELECT 'Pelajar', sum(ifnull(bilpelajar,0))+200 + sum(if(pelawat regexp 'Sekolah',1,0)) Jumlah  
+                SELECT 'Pelajar', sum(ifnull(bilpelajar,0)) + sum(if(pelawat regexp 'Sekolah',1,0)) Jumlah  
                 FROM azhamezcute_logdb.events_visitors a 
                 WHERE eventid = ? AND 
                     nama <> '' and
