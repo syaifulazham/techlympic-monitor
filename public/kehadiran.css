@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Tektur&display=swap');
+
+body{
+    font-family: 'Tektur', cursive;
+}
+
+.container{
+    width: 100%;
+
+}
+
+
+.table{
+    border-radius: 15px;
+    width: 500px;
+    border: 1px solid #6e6e6e;
+    border-collapse: collapse;
+}
+
+.table td,th{
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.table tr:nth-child(even){
+    background-color: #e7e7e7;
+}
+
+.align-right{
+    text-align: right;
+}
+
+.align-left{
+    text-align: left;
+}
+
+.table .tajuk{
+    font-size: 110%;
+    font-weight: 600;
+    text-align: center;
+    background-color: #6e6e6e;
+    color: #fff;
+}
+
+.text-total{
+    font-size: 110%;
+    font-weight: 600;
+    color: #00F;
+}

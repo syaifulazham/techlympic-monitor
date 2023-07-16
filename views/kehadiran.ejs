@@ -1,0 +1,54 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="../kehadiran.css">
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="panel">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td colspan="2" class="tajuk">Total 15 & 16-07-2023</td>
+                        </tr>
+                        <tr>
+                            <th class="align-left">Perkara</th>
+                            <th class="align-right">Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <%total.forEach(d=>{%>
+                           <tr>
+                            <td><%=d.Guru%></td>
+                            <td class="align-right <%=(d.Guru==='TOTAL PELAWAT'?'text-total':'')%>"><%=d.Jumlah%></td>
+                           </tr> 
+                        <%})%>
+                    </tbody>
+                </table>
+            </div>
+
+            
+            <div class="panel">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td colspan="2" class="tajuk">Hari ini 16-07-2023</td>
+                        </tr>
+                        <tr>
+                            <th class="align-left">Perkara</th>
+                            <th class="align-right">Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <%tdy.forEach(d=>{%>
+                           <tr>
+                            <td><%=d.Guru%></td>
+                            <td class="align-right <%=(d.Guru==='TOTAL PELAWAT'?'text-total':'')%>"><%=d.Jumlah%></td>
+                           </tr> 
+                        <%})%>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+</html>

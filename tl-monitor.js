@@ -21,6 +21,16 @@ app.get('/', (req, res) => {
   res.render('index',{message:''});
 });
 
+
+app.get('/kehadiran/:eventid', (req, res) => {
+  const eventid = req.params.eventid;
+  api.logdb.total(eventid, (data)=>{
+    api.logdb.today(eventid, (semasa)=>{
+      res.render('kehadiran',{total:data, tdy:semasa});
+    })
+  })
+});
+
 app.post('/api/count/users', (req, res) =>{
   api.count.users((data)=>{
     res.send(data);
