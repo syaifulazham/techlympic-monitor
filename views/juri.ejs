@@ -1,0 +1,151 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="../../main.css">
+    </head>
+
+    <body>
+
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <div class="container">
+            <div class="panel">
+                <div class="panel-body">
+                    <div class="top">
+                        <div class="field-group">
+                            <div class="field-label bold">Nama Hakim</div>
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label bold">Nama Sekolah</div>
+                        </div>
+                        <div class="field-group">
+                            <div id="list-peserta" class="f-row width-full f-wrap">
+                                <div class="width-50">
+                                    1. AHMAD JAILANI
+                                </div>
+                                <div class="width-50">
+                                    2. SAMSIAH SIDEK
+                                </div>
+                                <div class="width-50">
+                                    3. ROSLAN BAKAR
+                                </div>
+                                <div class="width-50">
+                                    4. AALI JAMIL
+                                </div>
+                            </div>
+                            <div class="total-mark float-right">00</div>
+                        </div>
+                    </div>
+                    <div class="bottom">
+                        
+                        <%if(kod==='5.1R'){%>
+                            <%
+                            var f = [
+                                {
+                                    label: 'Pembentangan', 
+                                    eval:[
+                                        ['Peserta lemah dalam membentang dan tidak memahaminya',5],
+                                        ['Peserta kurang dalam membentang namun mampu menjelaskannya',10],
+                                        ['Peserta sederhana dalam kemahiran pembentangan dan baik dalam penjelasannya',15],
+                                        ['Peserta baik dalam pembentangan dan penjelasan yang lancar',20],
+                                        ['Peserta cemerlang dalam pembentangan dan penjelasan yang lancar',25],
+                                    ]
+                                },
+                                {
+                                    label: 'Reka Bentuk', 
+                                    eval:[
+                                        ['Tidak aerodinamik dan tidak menarik',5],
+                                        ['Kurang aerodinamik namun menarik',10],
+                                        ['Kurang aerodinamik tetapi sesuai untuk perlumbaan',15],
+                                        ['Aerodinamik dan sesuai untuk perlumbaan',20],
+                                        ['Aerodinamik, sesuai untuk perlumbaan dan menarik',25],
+                                    ]
+                                },
+                                {
+                                    label: 'Kekemasan dalam pemasangan', 
+                                    eval:[
+                                        ['Tidak kemas dan pemasangan tidak menarik',5],
+                                        ['Tidak kemas dalam pemasangan namun boleh diterima',10],
+                                        ['Kekemasan yang sederhana dan pemasangan sesuai dalam reka bentuk',15],
+                                        ['Kekemasan yang baik dan pemasangna sesuai dalam reka bentuk',20],
+                                        ['Kekemasan yang sangat baik dan pemasangan sesuai dalam reka bentuk',25],
+                                    ]
+                                },
+                                {
+                                    label: 'Prestasi', 
+                                    eval:[
+                                        ['Lebih dari 1.401saat',5],
+                                        ['Antara 1.351 dan 1.400saat',10],
+                                        ['Antara 1.276 dan 1.350saat',15],
+                                        ['Antara 1.201 dan 1.275',20],
+                                        ['Bawah 1.200saat',25],
+                                    ]
+                                }
+                            ];
+
+                            var h = [];
+
+                            h.push('Kriteria/ Markah');
+                            f[0].eval.forEach(d=>{
+                                h.push(d[1])
+                            });
+                            h.push('Markah');
+
+
+                            
+
+
+                        %>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <%h.forEach(d=>{%>
+                                            <th><%=d%></th>
+                                        <%})%>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <%f.forEach((d, i)=>{%>
+                                        <tr>
+                                            <td class="label"><%=d.label%></td>
+                                            <%d.eval.forEach(td=>{%>
+                                                <td class="eval" col="<%=i%>" points="<%=td[1]%>"><%=td[0]%></td>
+                                            <%})%>
+                                            <td class="markah markah-<%=i%>"></td>
+                                        </tr>
+                                    <%})%>
+                                </tbody>
+                            </table>
+
+                            <script>
+                                $(document).ready(()=>{
+                                    var markahTotal = ()=>{
+                                        var total = 0;
+                                        $('.markah').each(function() {
+                                            var value = parseInt($(this).text()); // Get the numerical value from the cell
+                                            if (!isNaN(value)) {
+                                                total += value; // Add the value to the total
+                                            }
+                                        });
+
+                                        $('.total-mark').text(total);
+                                    }
+
+                                    $('.eval').on('click',(e)=>{
+                                        var points = $(e.currentTarget).attr('points');
+                                        var n = $(e.currentTarget).attr('col');
+                                        $('.markah-' + n).text(points);
+
+                                        $('.eval[col="' + n + '"]').removeClass('selected');
+                                        $(e.currentTarget).addClass('selected');
+
+                                        markahTotal();
+                                    })
+                                });
+                            </script>
+                        <%}%> <!--END OF 5.1R-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -20,6 +20,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
   res.render('index',{message:''});
 });
+app.get('/juri/:kod/:token', (req, res) => {
+  var kod = req.params.kod;
+  var token = req.params.token;
+  res.render('juri',{message:'', kod:kod});
+});
 
 
 app.get('/kehadiran/:eventid', (req, res) => {

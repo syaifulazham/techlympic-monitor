@@ -1,19 +1,164 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ChatGPT Example</title>
+  <title>Techlympics Management Panel</title>
+  <link rel="stylesheet" href="./main.css">
+
 </head>
 <body>
-  <h1>ChatGPT Example</h1>
-  
-  <form action="/chat" method="post">
-    <input type="text" name="message" placeholder="Type your message" required>
-    <button type="submit">Send</button>
-  </form>
-  
-  <% if (message) { %>
-    <p>You: <%= message %></p>
-    <p>Assistant: <%= reply %></p>
-  <% }%>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-menus">
+        <div class="brand">TechManage</div>
+        <div id="btnfizikal" for="nav-fizikal" class="nav-item selected">Fizikal</div>
+        <div id="btnonline" for="nav-online" class="nav-item">Online</div>
+      </div>
+      <div class="nav-menus float-right">
+        <div class="nav-item">
+          Profile
+        </div>
+        <div class="nav-item">
+          Login
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-nav nav-fizikal">
+      <div class="nav-menus">
+        <div class="nav-item selected">
+          Zon Utara
+        </div>
+        <div class="nav-item">
+          Zon Tengah
+        </div>
+        <div class="nav-item">
+          Zon Selatan
+        </div>
+        <div class="nav-item">
+          Zon Pantai Timur
+        </div>
+        <div class="nav-item">
+          Zon Sarawak
+        </div>
+        <div class="nav-item">
+          Zon Timut Sabah
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-nav nav-online hide">
+      <div class="nav-item">
+        Pertandingan
+      </div>
+    </div>
+
+    <div class="panel panel-fizikal">
+      <div id="main-menu-panel" class="panel-menu">
+        
+      </div>
+
+      <div class="panel-body body-kehadiran hide">
+        <div class="top">
+          <div class="panel-header">Kehadiran</div>
+          <div class="field-group">
+            <div class="field-label">Jenis Borang</div>
+          </div>
+          <div class="field-group">
+            <div class="field-label">Seksyen</div>
+          </div>
+          <div class="field-group">
+            <div class="field-label">Nota</div>
+          </div>
+        </div>
+        <div class="bottom">
+
+        </div>
+      </div>
+      
+      <div class="panel-body body-pertandingan hide">
+        <div class="top">
+          <div class="panel-header">Pertandingan</div>
+        </div>
+        <div class="bottom">
+
+        </div>
+      </div>
+      
+      <div class="panel-body body-dashboard hide">
+        <div class="top">
+          <div class="panel-header">Dashboard</div>
+        </div>
+        <div class="bottom">
+
+        </div>
+      </div>
+
+    </div>
+    
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <script>
+    var MENUS = {
+      fizikal:[
+        {label: 'Kehadiran', link:'./kehadiran', render: ()=>{$('.panel-body').addClass('hide');$('.body-kehadiran').removeClass('hide');}},
+        {label: 'Pertandingan', link:'./pertandingan', render: ()=>{$('.panel-body').addClass('hide');$('.body-pertandingan').removeClass('hide');}},
+        {label: 'Dashboard', link:'./dashboard', render: ()=>{$('.panel-body').addClass('hide');$('.body-dashboard').removeClass('hide');}}
+      ],
+      online:[
+        {label: 'Quiz Manager', link:''}
+      ]
+    }
+  </script>
+
+  <script>
+
+    var renderMenus = (area)=>{
+      data = MENUS[area];
+      mn = d3.select('#main-menu-panel');
+      mn.selectAll('*').remove();
+
+      mn.selectAll('.menu').data(data).enter().append('div').call(o=>{
+        o.attr('class','menu');
+        o.text(d=>d.label);
+        o.on('click',(e, d)=>d.render());
+      });
+
+      $('.menu').on('click', (e)=>{
+        $('.menu').removeClass('selected');
+        $(e.currentTarget).addClass('selected');
+      });
+      
+    }
+
+
+   
+    $('.nav .nav-item').on('click',(e)=>{
+      var sub = $(e.currentTarget).attr('for');
+      if(sub=='nav-fizikal'){
+        $('.panel').addClass('hide');
+        $('.panel-fizikal').removeClass('hide');
+        renderMenus('fizikal');
+      }else if(sub=='nav-online'){
+        $('.panel').addClass('hide');
+        $('.panel-online').removeClass('hide');
+        renderMenus('online');
+      }
+
+      $('.sub-nav').addClass('hide');
+      $('.' + sub).removeClass('hide');
+      $('.nav .nav-item').removeClass('selected');
+      $(e.currentTarget).addClass('selected');
+    });
+
+    $('.sub-nav .nav-item').on('click', (e)=>{
+      $('.sub-nav .nav-item').removeClass('selected');
+      $(e.currentTarget).addClass('selected');
+    });
+
+    renderMenus('fizikal');
+  </script>
 </body>
 </html>
