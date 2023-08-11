@@ -220,6 +220,51 @@ let API = {
                 console.log(err);
             }
         }
+    },
+
+    attandance:{
+        clockin: (id, fn) => {
+            var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+            try {
+                con.query(`
+                update aa_utara_hadir 
+                set hadir =1,
+                    dt_hadir = current_timestamp()
+                where qrcode = ?
+              `, id,function (err, result) {
+                    if (err) {
+                        console.log('but with some error: ',err);
+                    } else {
+                        console.log('... with some data: ',result);
+                        con.end();
+                        
+                        fn(result);
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        },
+        getQRcode:(id, fn)=>{
+            var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+            try {
+                con.query(`
+                select * from aa_utara_hadir where qrcode = ?
+              `, id, function (err, result) {
+                    if (err) {
+                        console.log('but with some error: ',err);
+                    } else {
+                        console.log('... with some data: ',result);
+                        con.end();
+                        
+                        fn(result);
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
     }
 }
 

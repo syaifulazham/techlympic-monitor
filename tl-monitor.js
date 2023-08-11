@@ -20,10 +20,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
   res.render('index',{message:''});
 });
+
 app.get('/juri/:kod/:token', (req, res) => {
   var kod = req.params.kod;
   var token = req.params.token;
   res.render('juri',{message:'', kod:kod});
+});
+
+app.get('/hadir', (req, res) => {
+  res.render('hadir',{message:''});
 });
 
 
@@ -33,6 +38,14 @@ app.get('/kehadiran/:eventid', (req, res) => {
     api.logdb.today(eventid, (semasa)=>{
       res.render('kehadiran',{total:data, tdy:semasa});
     })
+  })
+});
+
+app.post('/api/hadir/peserta', (req, res) =>{
+  var qr = req.body.qr;
+  console.log(qr);
+  api.attandance.getQRcode(qr, (dataqr)=>{
+    res.send(dataqr)
   })
 });
 
