@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Techlympics 2023 | KEHADIRAN</title>
-    <link rel="stylesheet" href="./main.css">
+    <link rel="stylesheet" href="./qrpage.css">
 </head>
 <body>
     
@@ -24,8 +24,9 @@
           <div id="main-menu-panel" class="panel-menu">
             
           </div>
+          
     
-          <div class="panel-body body-qr">
+          <div class="panel-body body-qr ">
             <div class="top">
               <!--<div class="panel-header">Kehadiran</div>-->
               <div class="field-group">
@@ -89,7 +90,9 @@
                     if(data){
                         var r = data[0];
                         console.log(r);
-                        d3.select('.panel-menu').insert('div',':first-child').attr('class','list text-slide-out-normal').text(getCurrentTime() + ' > ' + r.nama);
+                        var ins = d3.select('.panel-menu').insert('div',':first-child').attr('class','list f-row text-slide-out-normal');
+                        ins.append('div').attr('class','time').text(getCurrentTime());
+                        ins.append('div').attr('class','nama').text(r.nama);
                         $('#lblNama').text(r.nama);
                         $('#lblRole').text(r.prog_code!==''?'Peserta ' + r.pertandingan:'');
                         $('#lblSekolah').text(r.kodsekolah + ' | ' + r.namasekolah);
