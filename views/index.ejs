@@ -6,7 +6,11 @@
 
 </head>
 <body>
+  <%if(!session){%>
+    <%- include ('__login.ejs') %>
+  <%}else{%>
   <div class="container">
+    
     <div class="nav">
       <div class="nav-menus">
         <div class="brand">TechManage</div>
@@ -17,31 +21,36 @@
         <div class="nav-item">
           Profile
         </div>
-        <div class="nav-item">
-          Login
+        <div id="btnLogout" class="nav-item" onclick="onLogout()">
+          Logout
         </div>
+        <script>
+          function onLogout(){
+              window.location.href = "/admin/logout";
+          }
+        </script>
       </div>
     </div>
 
     <div class="sub-nav nav-fizikal">
       <div class="nav-menus">
-        <div class="nav-item selected">
+        <div class="nav-item zon selected" zon="utara">
           Zon Utara
         </div>
-        <div class="nav-item">
+        <div class="nav-item zon" zon="tengah">
           Zon Tengah
         </div>
-        <div class="nav-item">
+        <div class="nav-item zon" zon="selatan">
           Zon Selatan
         </div>
-        <div class="nav-item">
+        <div class="nav-item zon" zon="timur">
           Zon Pantai Timur
         </div>
-        <div class="nav-item">
+        <div class="nav-item zon" zon="sarawak">
           Zon Sarawak
         </div>
-        <div class="nav-item">
-          Zon Timut Sabah
+        <div class="nav-item zon" zon="sabah">
+          Zon Timur Sabah
         </div>
       </div>
     </div>
@@ -62,16 +71,46 @@
           <div class="panel-header">Kehadiran</div>
           <div class="field-group">
             <div class="field-label">Jenis Borang</div>
+            <div class="field f-grow-2">
+              <select name="cmbborang" id="cmbborang">
+                <option value="Kehadiran">Kehadiran</option>
+                <option value="Penyerahan Makanan I">Serahan Makanan I</option>
+                <option value="Penyerahan Makanan II">Serahan Makanan II</option>
+              </select>
+            </div>
           </div>
           <div class="field-group">
-            <div class="field-label">Seksyen</div>
+            <div class="field-label">Operator</div>
+            <div class="field f-grow-2">
+              <input id="txtoperator" type="text" placeholder="nama operator">
+            </div>
           </div>
           <div class="field-group">
             <div class="field-label">Nota</div>
+            <div class="field f-grow-2">
+              <input id="txtnota" type="text" placeholder="nota">
+            </div>
+          </div>
+          <div class="field-group">
+            <button id="addUser" class="float-right">Daftar</button>
           </div>
         </div>
         <div class="bottom">
+          <table id="tblKehadiran" class="table">
+            <thead>
+              <tr>
+                <th>Jenis</th>
+                <th>Pengguna</th>
+                <th>Nota</th>
+                <th>Passcode</th>
+                <th>URL</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
 
+            </tbody>
+          </table>
         </div>
       </div>
       
@@ -99,6 +138,77 @@
 
   <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <script>
+    function generateRandomString(length) {
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let result = '';
+
+      for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        result += characters.charAt(randomIndex);
+      }
+
+      return result;
+    }
+
+    var api = {
+      addUser(data, fn){
+        $.ajax({
+          type: "POST",
+          url: '/api/borangqr/adduser',
+          data: data,
+          success: (result)=>{
+            fn(result)
+          }
+        });
+
+      },
+
+      loadUsers(zon, fn){
+        $.ajax({
+          type: "POST",
+          url: '/api/borangqr/loadusers',
+          data: {zon:zon},
+          success: (result)=>{
+            fn(result)
+          }
+        });
+      }
+    }
+
+    function loadUsers(){
+      var zon = $('.zon.selected').attr('zon');
+      api.loadUsers(zon, udata=>{
+          var tbdy = d3.select('#tblKehadiran > tbody');
+          tbdy.selectAll('*').remove();
+          tbdy.selectAll('tr').data(udata).enter().append('tr').call(o=>{
+            o.append('td').text(d=>d.userrole);
+            o.append('td').text(d=>d.username);
+            o.append('td').text(d=>d.notes);
+            o.append('td').text(d=>d.pwd);
+            o.append('td').append('a').attr('href',d=>window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token).attr('target','_blank').text(d=>(window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token).substring(1,30) + '...');
+            o.append('td').append('button').text('...')
+          })
+        })
+    }
+
+    function saveUserBorangQR(){
+      var data = {
+        userrole: $('#cmbborang').val(),
+        username: $('#txtoperator').val(),
+        notes: $('#txtnota').val(),
+        pwd: generateRandomString(5),
+        zon: $('.zon.selected').attr('zon')
+      };
+
+      console.log(data);
+
+      api.addUser(data, (result)=>{
+        loadUsers();
+      })
+    }
+  </script>
 
   <script>
     var MENUS = {
@@ -134,31 +244,47 @@
     }
 
 
+    $(document).ready(()=>{
+        $('#addUser').on('click', ()=>{
+          saveUserBorangQR();
+        })
+
+        $('.nav .nav-item').on('click',(e)=>{
+        var sub = $(e.currentTarget).attr('for');
+        if(sub=='nav-fizikal'){
+          $('.panel').addClass('hide');
+          $('.panel-fizikal').removeClass('hide');
+          renderMenus('fizikal');
+        }else if(sub=='nav-online'){
+          $('.panel').addClass('hide');
+          $('.panel-online').removeClass('hide');
+          renderMenus('online');
+        }
+
+        $('.sub-nav').addClass('hide');
+        $('.' + sub).removeClass('hide');
+        $('.nav .nav-item').removeClass('selected');
+        $(e.currentTarget).addClass('selected');
+      });
+
+      $('.sub-nav .nav-item').on('click', (e)=>{
+        $('.sub-nav .nav-item').removeClass('selected');
+        $(e.currentTarget).addClass('selected');
+      });
+
+      $('.zon').on('click',()=>{
+        loadUsers();
+      })
+
+      renderMenus('fizikal');
+
+      loadUsers();
+    });
+
    
-    $('.nav .nav-item').on('click',(e)=>{
-      var sub = $(e.currentTarget).attr('for');
-      if(sub=='nav-fizikal'){
-        $('.panel').addClass('hide');
-        $('.panel-fizikal').removeClass('hide');
-        renderMenus('fizikal');
-      }else if(sub=='nav-online'){
-        $('.panel').addClass('hide');
-        $('.panel-online').removeClass('hide');
-        renderMenus('online');
-      }
-
-      $('.sub-nav').addClass('hide');
-      $('.' + sub).removeClass('hide');
-      $('.nav .nav-item').removeClass('selected');
-      $(e.currentTarget).addClass('selected');
-    });
-
-    $('.sub-nav .nav-item').on('click', (e)=>{
-      $('.sub-nav .nav-item').removeClass('selected');
-      $(e.currentTarget).addClass('selected');
-    });
-
-    renderMenus('fizikal');
+    
   </script>
+
+  <%}%>
 </body>
 </html>

@@ -338,6 +338,11 @@ body{
     gap: 2px;
 }
 
+.f-center{
+    align-items: center;
+    justify-content: center;
+}
+
 .center{
     align-items: center;
 }
@@ -396,6 +401,17 @@ body{
 
 .bold{
     font-weight: bold;
+}
+
+
+
+.login-panel{
+    width: 100%;
+    padding: 20px 0 20px 0;
+    background-color: var(--prime);
+    color: #fff;
+    border-top: 1px solid #2a5280;
+    border-bottom: 3px solid #2a5280;
 }
 
 

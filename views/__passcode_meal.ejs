@@ -1,0 +1,46 @@
+<div class="container f-center">
+    <div class="login-panel">
+        <div class="login-container f-column f-center">
+            <div class="login-header">
+                MASUKKAN KOD LALUAN
+            </div>
+            <div class="login-body">
+                <div class="login-field">
+                    <input id="pass" type="password" placeholder="passcode">
+                </div>
+                <div class="login-field f-row f-center">
+                    <button id="btnLogin">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<script>
+    var api = {
+        login(fn){
+            pass = $('#pass').val();
+            tk = window.location.href.split('/');
+            token = tk[tk.length-1];
+            $.ajax({
+                type:"POST",
+                url: '/api/meal/login',
+                data: {pwd:pass, token:token},
+                success: function (res) {
+                    fn(res);
+                },
+                dataType: 'json'
+            });
+        }
+    }
+    $(document).ready(()=>{
+        $('#btnLogin').on('click',()=>{
+            api.login(data=>{
+                location.reload()
+            })
+        })
+    });
+</script>

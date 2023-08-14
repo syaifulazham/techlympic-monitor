@@ -2,10 +2,12 @@
 <html>
 <head>
     <title>Techlympics 2023 | KEHADIRAN</title>
-    <link rel="stylesheet" href="./qrpage.css">
+    <link rel="stylesheet" href="../qrpage.css">
 </head>
 <body>
-    
+  <%if(!session){%>
+    <%- include ('__passcode_hadir.ejs') %>
+  <%}else{%>
     <div class="container">
         <div class="nav">
           <div class="nav-menus">
@@ -13,9 +15,14 @@
             <input id="qrCode" type="text">
           </div>
           <div class="nav-menus float-right">
-            <div class="nav-item">
-              ZON UTARA
+            <div class="nav-item" onclick="onLogout()">
+              <%=session.user.data.name%> | ZON <%=session.user.data.zon.toUpperCase()%>
             </div>
+            <script>
+              function onLogout(){
+                  window.location.href = "/hadir/logout";
+              }
+            </script>
           </div>
         </div>
     
@@ -74,7 +81,6 @@
                         url: '/api/hadir/peserta',
                         data: {qr: qr},
                         success: function (res) {
-                            
                             fn(res);
                         },
                         dataType: 'json'
@@ -116,5 +122,7 @@
         });
 
     </script>
+
+    <%}%>
 </body>
 </html>

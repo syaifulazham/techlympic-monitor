@@ -223,11 +223,11 @@ let API = {
     },
 
     attandance:{
-        clockin: (id, fn) => {
+        clockin: (zon, id, fn) => {
             var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
             try {
                 con.query(`
-                update aa_utara_hadir 
+                update aa_${zon}_hadir 
                 set hadir =1,
                     dt_hadir = current_timestamp()
                 where qrcode = ?
@@ -245,11 +245,35 @@ let API = {
                 console.log(e);
             }
         },
-        getQRcode:(id, fn)=>{
+        getmeal: (role, pembekal, zon, id, fn) => {
+            var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+            console.log('GETMEAL @@==================>>> ',role, pembekal, zon, id);
+            var mealset = (role==='Penyerahan Makanan I'?1:2);
+            try {
+                con.query(`
+                update aa_${zon}_hadir 
+                set meal${mealset} =?,
+                    dt_meal${mealset} = current_timestamp()
+                where qrcode = ?
+              `, [pembekal, id],function (err, result) {
+                    if (err) {
+                        console.log('but with some error: ',err);
+                    } else {
+                        console.log('... with some data: ',result);
+                        con.end();
+                        
+                        fn(result);
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        },
+        getQRcode:(zon, id, fn)=>{
             var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
             try {
                 con.query(`
-                select * from aa_utara_hadir where qrcode = ?
+                select * from aa_${zon}_hadir where qrcode = ?
               `, id, function (err, result) {
                     if (err) {
                         console.log('but with some error: ',err);
@@ -263,6 +287,166 @@ let API = {
             } catch (e) {
                 console.log(e);
             }
+        },
+
+        admin:{
+            login: (uid, pass, fn)=>{
+                //console.log('Login as: ',uid,pass,auth.auth()[__DATA__SCHEMA__]);
+                if(pass=='') return 0;
+                var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+                try{
+                    //"SELECT * from peserta WHERE kp = ? and peserta_password = AES_ENCRYPT(kp,CONCAT(?,?))
+                    con.query("SELECT * FROM aa_event_admin where username = ? and password = sha(?)",[uid, pass], 
+                    function (err, result) {
+                        console.log('result ====> ', result);
+                        if(result.length > 0){
+                            var user = {
+                                name: result[0].username
+                            };
+    
+                            con.end();
+                            
+                            fn({
+                                authorized: true,
+                                msg: 'User Authorized!',
+                                data: user
+                            });
+                        }else {
+                            con.end();
+    
+                            fn({
+                                authorized: false,
+                                msg: 'Incorrect Username of Password',
+                                data: []
+                            })
+                        }
+                    });
+                } catch(e){
+                    console.log(e);
+                }
+            },
+        },
+
+        user:{
+            add(data, fn){
+                var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+                try {
+                    con.query(`
+                    insert into aa_event_users(userrole, username, notes, pwd, token, zon)
+                    values(?,?,?,?,sha(?),?)
+                `, [data.userrole, data.username,data.notes, data.pwd, [data.username,data.pwd].join(), data.zon], function (err, result) {
+                        if (err) {
+                            console.log('but with some error: ',err);
+                        } else {
+                            console.log('... with some data: ',result);
+                            con.end();
+                            
+                            fn(result);
+                        }
+                    });
+                } catch (e) {
+                    console.log(e);
+                }
+            },
+            load(zon, fn){
+                var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+                try {
+                    con.query(`
+                    select * from aa_event_users where zon=? order by userrole
+                `, zon, function (err, result) {
+                        if (err) {
+                            console.log('but with some error: ',err);
+                        } else {
+                            console.log('... with some data: ',result);
+                            con.end();
+                            
+                            fn(result);
+                        }
+                    });
+                } catch (e) {
+                    console.log(e);
+                }
+            },
+
+            login(token, pass, fn){
+                //console.log('Login as: ',uid,pass,auth.auth()[__DATA__SCHEMA__]);
+                if(token=='' || pass=='') return 0;
+                var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+                try{
+                    //"SELECT * from peserta WHERE kp = ? and peserta_password = AES_ENCRYPT(kp,CONCAT(?,?))
+                    con.query("SELECT * FROM aa_event_users where token = ? and pwd = ? and userrole = 'Kehadiran'",[token, pass], 
+                    function (err, result) {
+                        console.log('result ====> ', result);
+                        if(result.length > 0){
+                            var user = {
+                                name: result[0].username,
+                                notes: result[0].notes,
+                                token: result[0].token,
+                                zon: result[0].zon,
+                                role: result[0].userrole
+                            };
+    
+                            con.end();
+                            
+                            fn({
+                                authorized: true,
+                                msg: 'User Authorized!',
+                                data: user
+                            });
+                        }else {
+                            con.end();
+    
+                            fn({
+                                authorized: false,
+                                msg: 'Incorrect Username of Password',
+                                data: []
+                            })
+                        }
+                    });
+                } catch(e){
+                    console.log(e);
+                }
+            },
+
+            login_meal(token, pass, fn){
+                //console.log('Login as: ',uid,pass,auth.auth()[__DATA__SCHEMA__]);
+                if(token=='' || pass=='') return 0;
+                var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+                try{
+                    //"SELECT * from peserta WHERE kp = ? and peserta_password = AES_ENCRYPT(kp,CONCAT(?,?))
+                    con.query("SELECT * FROM aa_event_users where token = ? and pwd = ? and userrole regexp 'Makanan'",[token, pass], 
+                    function (err, result) {
+                        console.log('result ====> ', result);
+                        if(result.length > 0){
+                            var user = {
+                                name: result[0].username,
+                                notes: result[0].notes,
+                                token: result[0].token,
+                                zon: result[0].zon,
+                                role: result[0].userrole
+                            };
+    
+                            con.end();
+                            
+                            fn({
+                                authorized: true,
+                                msg: 'User Authorized!',
+                                data: user
+                            });
+                        }else {
+                            con.end();
+    
+                            fn({
+                                authorized: false,
+                                msg: 'Incorrect Username of Password',
+                                data: []
+                            })
+                        }
+                    });
+                } catch(e){
+                    console.log(e);
+                }
+            },
         }
 
     }
