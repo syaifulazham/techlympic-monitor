@@ -223,15 +223,32 @@ let API = {
     },
 
     attandance:{
-        clockin: (zon, id, fn) => {
+        clockin: (zon, id, role, kodsekolah, fn) => {
             var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
             try {
-                con.query(`
-                update aa_${zon}_hadir 
-                set hadir =1,
-                    dt_hadir = current_timestamp()
-                where qrcode = ?
-              `, id,function (err, result) {
+                var constr = '';
+                var cond = '';
+
+                if(role==='Guru Pengiring' || role==='Penjaga'){
+                    constr = `
+                    update aa_${zon}_hadir 
+                    set hadir =1,
+                        dt_hadir = current_timestamp()
+                    where kodsekolah = ?
+                  `;
+
+                  cond = kodsekolah;
+                }else{
+                    constr = `
+                    update aa_${zon}_hadir 
+                    set hadir = 1,
+                        dt_hadir = current_timestamp()
+                    where qrcode = ?
+                  `;
+
+                  cond = id;
+                }
+                con.query(constr, cond,function (err, result) {
                     if (err) {
                         console.log('but with some error: ',err);
                     } else {
@@ -287,6 +304,31 @@ let API = {
             } catch (e) {
                 console.log(e);
             }
+        },
+
+        stats:{
+            kehadiran(zon, fn){
+                var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+                try {
+                    con.query(`
+                    SELECT if(usr_role IN('Ibu Bapa','Guru'),'Peserta',usr_role) kehadiran, 
+                        COUNT(*) jangka_hadir, SUM(if(hadir=1,1,0)) telah_hadir, 
+                        SUM(if(hadir=0,1,0)) belum_hadir
+                    FROM (SELECT a.* from aa_${zon}_hadir a LEFT JOIN program b USING(prog_code) WHERE prog_desc = 'fizikal' OR usr_role IN('Guru Pengiring','Penjaga','Media','VIP')) a  GROUP BY kehadiran;
+                `, zon, function (err, result) {
+                        if (err) {
+                            console.log('but with some error: ',err);
+                        } else {
+                            console.log('... with some data: ',result);
+                            con.end();
+                            
+                            fn(result);
+                        }
+                    });
+                } catch (e) {
+                    console.log(e);
+                }
+            },
         },
 
         admin:{

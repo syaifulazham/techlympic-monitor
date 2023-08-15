@@ -147,10 +147,22 @@
       <div class="panel-body body-dashboard hide">
         <div class="top">
           <div class="panel-header">Dashboard</div>
-          
         </div>
         <div class="bottom">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Kehadiran</th>
+                <th>Jangka Hadir</th>
+                <th>Telah Hadir</th>
+                <th>Belum hadir</th>
+              </tr>
+            </thead>
+            <tbody id="statsHadir">
 
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -243,6 +255,19 @@
           }
         });
       },
+
+      stats:{
+        kehadiran(zon, fn){
+          $.ajax({
+            type: "POST",
+            url: '/api/stats/hadir',
+            data: {zon:zon},
+            success: (result)=>{
+              fn(result)
+            }
+          });
+        },
+      }
     }
 
     function loadUsers(){
@@ -353,6 +378,47 @@
 
         loadPertandingan();
 
+
+        /*--------------------------DASHBOARD--------------------------*/
+        var loadStatsHadir = ()=>{
+          var zon = $('.zon.selected').attr('zon');
+          api.stats.kehadiran(zon, data=>{
+            console.log(data);
+
+            var total={
+              kehadiran: 'TOTAL',
+              jangka_hadir: 0,
+              telah_hadir: 0,
+              belum_hadir:0
+            }
+
+            data.forEach(d=>{
+              total.jangka_hadir += d.jangka_hadir;
+              total.telah_hadir += d.telah_hadir;
+              total.belum_hadir += d.belum_hadir;
+            });
+
+            data.push(total);
+
+            var db = d3.select('#statsHadir');
+            db.selectAll('*').remove();
+            db.selectAll('tr').data(data).enter().append('tr').call(o=>{
+              o.append('td',(d,i)=>i);
+              o.append('td').text(d=>d.kehadiran);
+              o.append('td').attr('style','text-align:center').text(d=>d.jangka_hadir);
+              _h = o.append('td').attr('style','text-align:center');
+              _h.append('span').attr('style','font-weight:bold;color:#008').text(d=>d.telah_hadir);
+              _h.append('span').attr('style','color:#656565;margin-left:10px').text(d=>Math.round(d.telah_hadir/d.jangka_hadir*100,2) + '%');
+              _xh = o.append('td').attr('style','text-align:center');//.text(d=>d.belum_hadir);
+              _xh.append('span').attr('style','font-weight:bold;color:#800').text(d=>d.belum_hadir);
+              _xh.append('span').attr('style','color:#656565;margin-left:10px').text(d=>Math.round(d.belum_hadir/d.jangka_hadir*100,2) + '%');
+            });
+
+          })
+        }
+        loadStatsHadir();
+        setInterval(loadStatsHadir, 10000);
+
         $('#cmbperingkat').on('change',()=>{
           loadPertandingan();
         });
@@ -389,15 +455,24 @@
               grp.selectAll('.table-group').data(d=>[d.k1,d.k2]).enter().append('div').call(o=>{
                 o.attr('class',d=>'table-group width-50 f-gap-2 f-column ' + (d.length===0?'hide':''));
 
-                pnl = o.append('div').attr('class','f-column width-full').attr('style','background-color:#000;color:#fff;padding:15px');
+                pnl = o.append('div').attr('class','f-column width-full').attr('style',d=>{
+                  r = '';
+                  if(d.length>0){
+                    r = d[0].hadir===1?'background-color:#1b67f5;color:#fff;padding:15px':'background-color:#000;color:#fff;padding:15px'
+                  }else{
+                    r = 'background-color:#000;color:#fff;padding:15px'
+                  }
+                  return r;
+                });
                 pnl.append('div').text(d=>d.length>0?('Kumpulan: ' + d[0].nama_kumpulan):'');
                 pnl.append('div').text(d=>d.length>0?('Pengiring: ' + d[0].pengiring):'');
 
                 tbl = o.append('table').attr('class','table width-full');
                 trh = tbl.append('thead').append('tr');
-                trh.selectAll('th').data(['Nama','KP']).enter().append('th').text(d=>d);
+                trh.selectAll('th').data(['#','Nama','KP']).enter().append('th').text(d=>d);
                 tbdy = tbl.append('tbody');
                 tbdy.selectAll('tr').data(d=>d).enter().append('tr').call(tr=>{
+                  tr.append('td').attr('style',d=>d.hadir==1?'background-color:#1b67f5;color:#fff':'').text((d,i)=>i);
                   tr.append('td').text(d=>d.nama);
                   tr.append('td').attr('style','width:40px').text(d=>d.kp);
                 })

@@ -172,7 +172,10 @@ app.post('/api/hadir/peserta', (req, res) =>{
   api.attandance.getQRcode(zon, qr, (dataqr)=>{
     if(dataqr){
       if(dataqr[0].hadir==0){
-        api.attandance.clockin(zon, qr, result=>{
+        console.log('---------|||||----->>>>>', dataqr[0].usr_role,dataqr[0].kodsekolah)
+        var role = dataqr[0].usr_role;
+        var kodsekolah = dataqr[0].kodsekolah;
+        api.attandance.clockin(zon, qr, role, kodsekolah, result=>{
           res.send(dataqr);
         })
       }else{
@@ -182,6 +185,13 @@ app.post('/api/hadir/peserta', (req, res) =>{
       res.send([{msg:'Tiada dalam rekod'}])
     }
     
+  })
+});
+
+app.post('/api/stats/hadir', (req,res)=>{
+  var zon = req.body.zon;
+  api.attandance.stats.kehadiran(zon, result=>{
+    res.send(result);
   })
 });
 

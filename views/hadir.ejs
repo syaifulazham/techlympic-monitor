@@ -100,7 +100,7 @@
                         ins.append('div').attr('class','time').text(getCurrentTime());
                         ins.append('div').attr('class','nama').text(r.nama);
                         $('#lblNama').text(r.nama);
-                        $('#lblRole').text(r.prog_code!==''?'Peserta ' + r.pertandingan:'');
+                        $('#lblRole').text(r.usr_role=='Guru' || r.usr_role=='Ibu Bapa'? ('Peserta ' + r.pertandingan) : r.usr_role);//.text(r.prog_code!==''?('Peserta ' + r.pertandingan):'');
                         $('#lblSekolah').text(r.kodsekolah + ' | ' + r.namasekolah);
                         d3.selectAll('.welcome-text').remove();
                         d3.select('.welcome-me').append('div').attr('class','width-full welcome-text welcome align-center text-slide-out').text('Selamat Datang');
