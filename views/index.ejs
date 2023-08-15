@@ -339,16 +339,22 @@
       /*--------------------------------------*/
 
       /*PERTANDINGAN*/
-        $('#cmbperingkat').on('change',()=>{
+        function loadPertandingan(){
           var peringkat = $('#cmbperingkat').val();
-          api.loadPertandingan('fizikal', peringkat, data=>{
-            console.log(data);
-            d3.select('#cmbpertandingan').selectAll('option').remove();
-            d3.select('#cmbpertandingan').append('option').attr('value','');
-            d3.select('#cmbpertandingan').selectAll('.option-pertandingan').data(data).enter().append('option').call(o=>{
-              o.attr('class','option-pertandingan').attr('value',d=>d.prog_code).text(d=>d.prog_name);
-            });
-          })
+            api.loadPertandingan('fizikal', peringkat, data=>{
+              console.log(data);
+              d3.select('#cmbpertandingan').selectAll('option').remove();
+              d3.select('#cmbpertandingan').append('option').attr('value','');
+              d3.select('#cmbpertandingan').selectAll('.option-pertandingan').data(data).enter().append('option').call(o=>{
+                o.attr('class','option-pertandingan').attr('value',d=>d.prog_code).text(d=>d.prog_name);
+              });
+            })
+        }
+
+        loadPertandingan();
+
+        $('#cmbperingkat').on('change',()=>{
+          loadPertandingan();
         });
 
         $('#btnPertandingan').on('click', ()=>{
