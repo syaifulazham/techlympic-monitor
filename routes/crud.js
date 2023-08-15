@@ -449,6 +449,48 @@ let API = {
             },
         }
 
+    },
+
+    pertandingan:{
+        getPertandingan(jenis, peringkat, fn){
+            console.log('---------------->-@',jenis,peringkat)
+            var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+            try {
+                con.query(`
+                select * from program where prog_desc = ? and target_group = ?
+              `, [jenis, peringkat],function (err, result) {
+                    if (err) {
+                        console.log('but with some error: ',err);
+                    } else {
+                        console.log('... with some data: ',result);
+                        con.end();
+                        
+                        fn(result);
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        },
+        getPeserta(kod, fn){
+            var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+            try {
+                con.query(`
+                select * from aa_utara_hadir where prog_code = ?
+              `, [kod],function (err, result) {
+                    if (err) {
+                        console.log('but with some error: ',err);
+                    } else {
+                        console.log('... with some data: ',result);
+                        con.end();
+                        
+                        fn(result);
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        },
     }
 }
 

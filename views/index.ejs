@@ -113,10 +113,31 @@
           </table>
         </div>
       </div>
+
+      <div class="panel-body body-walkin hide">
+        <div class="top">
+          <div class="panel-header">Pendaftaran Walk-in</div>
+        </div>
+        <div class="bottom">
+
+        </div>
+      </div>
       
       <div class="panel-body body-pertandingan hide">
         <div class="top">
           <div class="panel-header">Pertandingan</div>
+          <div class="field-group">
+            <select name="cmbperingkat" id="cmbperingkat">
+              <option value="Rendah">Rendah</option>
+              <option value="Menengah">Menengah</option>
+            </select>
+
+            <select name="cmbpertandingan" id="cmbpertandingan" class="f-grow-2">
+              
+            </select>
+
+            <button id="btnPertandingan">Pilih</button>
+          </div>
         </div>
         <div class="bottom">
 
@@ -126,6 +147,7 @@
       <div class="panel-body body-dashboard hide">
         <div class="top">
           <div class="panel-header">Dashboard</div>
+          
         </div>
         <div class="bottom">
 
@@ -136,10 +158,34 @@
     
   </div>
 
+  <div class="popup hide">
+    <div class="popup-body">
+      <div class="popup-header">
+        <button class="button float-right" id="btnCopy">Salin</button>
+        <button class="button" id="btnClose">X</button>
+      </div>
+      <div id="link-panel">
+        
+      </div>
+    </div>
+  </div>
+
   <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
 
   <script>
+    function distinct(array) {
+      const uniqueArray = [];
+      
+      for (const item of array) {
+        if (!uniqueArray.includes(item)) {
+          uniqueArray.push(item);
+        }
+      }
+      
+      return uniqueArray;
+    }
+
     function generateRandomString(length) {
       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       let result = '';
@@ -174,7 +220,29 @@
             fn(result)
           }
         });
-      }
+      },
+
+      loadPertandingan(jenis, peringkat, fn){
+        $.ajax({
+          type: "POST",
+          url: '/api/pertandingan/loadpertandingan',
+          data: {jenis:jenis, peringkat:peringkat},
+          success: (result)=>{
+            fn(result)
+          }
+        });
+      },
+
+      loadPeserta(kod, fn){
+        $.ajax({
+          type: "POST",
+          url: '/api/pertandingan/loadpeserta',
+          data: {kod:kod},
+          success: (result)=>{
+            fn(result)
+          }
+        });
+      },
     }
 
     function loadUsers(){
@@ -188,7 +256,10 @@
             o.append('td').text(d=>d.notes);
             o.append('td').text(d=>d.pwd);
             o.append('td').append('a').attr('href',d=>window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token).attr('target','_blank').text(d=>(window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token).substring(1,30) + '...');
-            o.append('td').append('button').text('...')
+            o.append('td').append('button').on('click',(e, d)=>{
+              $('.popup').removeClass('hide');
+              $('#link-panel').html('Link: ' + window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token +'  Passcode: ' + d.pwd)
+            }).text('...')
           })
         })
     }
@@ -214,6 +285,7 @@
     var MENUS = {
       fizikal:[
         {label: 'Kehadiran', link:'./kehadiran', render: ()=>{$('.panel-body').addClass('hide');$('.body-kehadiran').removeClass('hide');}},
+        {label: 'Walk-in', link:'./walkin', render: ()=>{$('.panel-body').addClass('hide');$('.body-walkin').removeClass('hide');}},
         {label: 'Pertandingan', link:'./pertandingan', render: ()=>{$('.panel-body').addClass('hide');$('.body-pertandingan').removeClass('hide');}},
         {label: 'Dashboard', link:'./dashboard', render: ()=>{$('.panel-body').addClass('hide');$('.body-dashboard').removeClass('hide');}}
       ],
@@ -245,6 +317,91 @@
 
 
     $(document).ready(()=>{
+      /*popup and copy handling*/
+        $('#btnClose').on('click',()=>{
+          $('.popup').addClass('hide');
+        });
+
+        $('#btnCopy').click(function() {
+          const linkPanelText = $('#link-panel').html();
+          const dummyElement = $('<textarea>').val(linkPanelText).appendTo('body').select();
+          
+          try {
+            const successful = document.execCommand('copy');
+            const message = successful ? 'Text copied to clipboard!' : 'Unable to copy text.';
+            console.log(message);
+          } catch (err) {
+            console.error('Failed to copy text:', err);
+          }
+          
+          dummyElement.remove();
+      });
+      /*--------------------------------------*/
+
+      /*PERTANDINGAN*/
+        $('#cmbperingkat').on('change',()=>{
+          var peringkat = $('#cmbperingkat').val();
+          api.loadPertandingan('fizikal', peringkat, data=>{
+            console.log(data);
+            d3.select('#cmbpertandingan').selectAll('option').remove();
+            d3.select('#cmbpertandingan').append('option').attr('value','');
+            d3.select('#cmbpertandingan').selectAll('.option-pertandingan').data(data).enter().append('option').call(o=>{
+              o.attr('class','option-pertandingan').attr('value',d=>d.prog_code).text(d=>d.prog_name);
+            });
+          })
+        });
+
+        $('#btnPertandingan').on('click', ()=>{
+          console.log($('#cmbpertandingan').val());
+          var kod = $('#cmbpertandingan').val();
+          api.loadPeserta(kod, data=>{
+            console.log(data);
+            var _kodsekolah = [];
+            data.forEach(d=>{_kodsekolah.push(d.kodsekolah)});
+            _kodsekolah = distinct(_kodsekolah);
+           
+            var sekolah = [];
+            _kodsekolah.forEach(k=>{
+              sekolah.push({
+                kodsekolah:k, 
+                negeri: data.filter(d=>d.kodsekolah==k)[0].negeri,
+                namasekolah: data.filter(d=>d.kodsekolah==k)[0].namasekolah,
+                k1:data.filter(d=>d.kodsekolah==k && d.kumpulan==1), 
+                k2:data.filter(d=>d.kodsekolah==k && d.kumpulan==2)
+              });
+            });
+            console.log(sekolah);
+
+            var comp = d3.select('.body-pertandingan > .bottom');
+            comp.selectAll('*').remove();
+            comp.selectAll('.pertandingan').data(sekolah).enter().append('div').call(o=>{
+              p = o.attr('class','pertandingan f-column width-full');
+              h = p.append('div').attr('class','pertandingan-header f-row width-full');
+              h.append('div').attr('class','nama-negeri').text(d=>d.negeri);
+              h.append('div').attr('class','nama-sekolah f-grow-2').text(d=>d.namasekolah);
+              grp = p.append('div').attr('class','f-row width-full f-center');
+              grp.selectAll('.table-group').data(d=>[d.k1,d.k2]).enter().append('div').call(o=>{
+                o.attr('class',d=>'table-group width-50 f-gap-2 f-column ' + (d.length===0?'hide':''));
+
+                pnl = o.append('div').attr('class','f-column width-full').attr('style','background-color:#000;color:#fff;padding:15px');
+                pnl.append('div').text(d=>d.length>0?('Kumpulan: ' + d[0].nama_kumpulan):'');
+                pnl.append('div').text(d=>d.length>0?('Pengiring: ' + d[0].pengiring):'');
+
+                tbl = o.append('table').attr('class','table width-full');
+                trh = tbl.append('thead').append('tr');
+                trh.selectAll('th').data(['Nama','KP']).enter().append('th').text(d=>d);
+                tbdy = tbl.append('tbody');
+                tbdy.selectAll('tr').data(d=>d).enter().append('tr').call(tr=>{
+                  tr.append('td').text(d=>d.nama);
+                  tr.append('td').attr('style','width:40px').text(d=>d.kp);
+                })
+              })
+
+            })
+          });
+        });
+      /*--------------------------------------*/
+
         $('#addUser').on('click', ()=>{
           saveUserBorangQR();
         })

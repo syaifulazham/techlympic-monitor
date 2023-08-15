@@ -207,6 +207,24 @@ app.post('/api/borangqr/loadusers', (req,res)=>{
   })
 });
 
+/*----------------------------PERTANDINGAN-----------------------*/
+app.post('/api/pertandingan/loadpertandingan', (req,res)=>{
+  var jenis = req.body.jenis;
+  var peringkat = req.body.peringkat;
+  api.pertandingan.getPertandingan(jenis, peringkat, result=>{
+    res.send(result);
+  })
+});
+
+app.post('/api/pertandingan/loadpeserta', (req,res)=>{
+  console.log('/api/pertandingan/loadpeserta');
+  var kod = req.body.kod;
+  api.pertandingan.getPeserta(kod, result=>{
+    res.send(result);
+  })
+});
+/*-----------------------END-----PERTANDINGAN-----------------------*/
+
 app.post('/api/count/users', (req, res) =>{
   api.count.users((data)=>{
     res.send(data);
