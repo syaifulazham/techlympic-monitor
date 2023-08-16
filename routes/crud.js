@@ -331,7 +331,7 @@ let API = {
                         if (err) {
                             console.log('but with some error: ',err);
                         } else {
-                            console.log('... with some data: ',result);
+                            //console.log('... with some data: ',result);
                             con.end();
                             
                             fn(result);
