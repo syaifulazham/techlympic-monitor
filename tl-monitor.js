@@ -190,7 +190,8 @@ app.post('/api/hadir/peserta', (req, res) =>{
 
 app.post('/api/stats/hadir', (req,res)=>{
   var zon = req.body.zon;
-  api.attandance.stats.kehadiran(zon, result=>{
+  var peringkat = req.body.peringkat;
+  api.attandance.stats.kehadiran(zon, peringkat, result=>{
     res.send(result);
   })
 });

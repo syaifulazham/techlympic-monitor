@@ -381,6 +381,10 @@ body{
     font-size: x-large;
 }
 
+.hd-dashboard > th{
+    background-color: #c055fd;
+}
+
 .total-mark{
     padding: 25px;
     font-weight: bolder;

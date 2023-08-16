@@ -307,15 +307,27 @@ let API = {
         },
 
         stats:{
-            kehadiran(zon, fn){
+            kehadiran(zon, peringkat, fn){
                 var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
                 try {
-                    con.query(`
-                    SELECT if(usr_role IN('Ibu Bapa','Guru'),'Peserta',usr_role) kehadiran, 
-                        COUNT(*) jangka_hadir, SUM(if(hadir=1,1,0)) telah_hadir, 
-                        SUM(if(hadir=0,1,0)) belum_hadir
-                    FROM (SELECT a.* from aa_${zon}_hadir a LEFT JOIN program b USING(prog_code) WHERE prog_desc = 'fizikal' OR usr_role IN('Guru Pengiring','Penjaga','Media','VIP')) a  GROUP BY kehadiran;
-                `, zon, function (err, result) {
+                    var sqlstr = '';
+                    var cond = '';
+                    if(peringkat!==''){
+                        sqlstr = `
+                        SELECT if(usr_role IN('Ibu Bapa','Guru'),'Peserta',usr_role) kehadiran, 
+                            COUNT(*) jangka_hadir, SUM(if(hadir=1,1,0)) telah_hadir, 
+                            SUM(if(hadir=0,1,0)) belum_hadir
+                        FROM (SELECT a.* from aa_${zon}_hadir a LEFT JOIN program b USING(prog_code) WHERE (prog_desc = 'fizikal' OR usr_role IN('Guru Pengiring','Penjaga','Media','VIP')) and peringkat = ?) a  GROUP BY kehadiran;
+                    `
+                    }else{
+                        sqlstr = `
+                        SELECT if(usr_role IN('Ibu Bapa','Guru'),'Peserta',usr_role) kehadiran, 
+                            COUNT(*) jangka_hadir, SUM(if(hadir=1,1,0)) telah_hadir, 
+                            SUM(if(hadir=0,1,0)) belum_hadir
+                        FROM (SELECT a.* from aa_${zon}_hadir a LEFT JOIN program b USING(prog_code) WHERE prog_desc = 'fizikal' OR usr_role IN('Guru Pengiring','Penjaga','Media','VIP')) a  GROUP BY kehadiran;
+                    `
+                    }
+                    con.query(sqlstr, [peringkat], function (err, result) {
                         if (err) {
                             console.log('but with some error: ',err);
                         } else {
