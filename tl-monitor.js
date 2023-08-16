@@ -1,4 +1,5 @@
 const express = require('express');
+const qrcode = require('qrcode');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const app = express();
@@ -32,6 +33,23 @@ app.get('/', (req, res) => {
   var session = req.cookies['eventadmin'];
   console.log(session);
   res.render('index',{message:'', session: session});
+});
+
+
+app.post('/api/qr/generate', async (req, res) => {
+  const { data } = req.body;  
+
+  if (!data) {
+    return res.status(400).json({ error: 'Data is required in the request body.' });
+  }
+
+  try {
+    const qrCodeImage = await qrcode.toDataURL(data);
+    res.json({ qrCodeImage });
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    res.status(500).json({ error: 'An error occurred while generating the QR code.' });
+  }
 });
 
 app.get('/juri/:kod/:token', (req, res) => {

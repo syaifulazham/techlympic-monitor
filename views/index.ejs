@@ -214,6 +214,7 @@
       <div id="link-panel">
         
       </div>
+      <img src="" alt="" id="img-qr">
     </div>
   </div>
 
@@ -302,6 +303,25 @@
             }
           });
         },
+      },
+
+      generate: {
+        qrcode(inputData, fn){
+          $.ajax({
+            type: 'POST',
+            url: '/api/qr/generate',
+            contentType: 'application/json',
+            data: JSON.stringify({ data: inputData }),
+            success: function(response) {
+              fn(response.qrCodeImage);
+              //$('#qrCodeImage').attr('src', response.qrCodeImage);
+            },
+            error: function(xhr, status, error) {
+              console.error('Error:', error);
+              alert('An error occurred while generating the QR code.');
+            }
+          });
+        }
       }
     }
 
@@ -317,6 +337,10 @@
             o.append('td').text(d=>d.pwd);
             o.append('td').append('a').attr('href',d=>window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token).attr('target','_blank').text(d=>(window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token).substring(1,30) + '...');
             o.append('td').append('button').on('click',(e, d)=>{
+              m = window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token;
+              api.generate.qrcode(m, gen=>{
+                $('#img-qr').attr('src',gen);
+              });
               $('.popup').removeClass('hide');
               $('#link-panel').html('Link: ' + window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token +'  Passcode: ' + d.pwd)
             }).text('...')
@@ -491,7 +515,7 @@
               p = o.attr('class','pertandingan f-column width-full');
               h = p.append('div').attr('style','cursor:pointer').attr('class','pertandingan-header f-row width-full');
               h.append('img').attr('class','img-negeri').attr('src',d=>'./img/states/' + d.negeri + '.png');
-              h.append('div').attr('class','nama-sekolah f-grow-2').text(d=>d.namasekolah);
+              h.append('div').attr('class','nama-sekolah f-grow-2').text(d=>'(' + d.kodsekolah + ') ' + d.namasekolah);
 
               h.on('click',(e)=>{
                 $(e.currentTarget).parent().find('.panel-kumpulan').toggleClass('hide');
@@ -504,7 +528,13 @@
                 pnl = o.append('div').attr('class','f-column width-full').attr('style',d=>{
                   r = '';
                   if(d.length>0){
-                    r = d[0].hadir===1?'background-color:#1b67f5;color:#fff;padding:15px':'background-color:#000;color:#fff;padding:15px'
+
+                    if(d[0].status_peserta===1){
+                      r = 'background-color:#880000;color:#fff;padding:15px'
+                    }else{
+                      r = d[0].hadir===1?'background-color:#1b67f5;color:#fff;padding:15px':'background-color:#000;color:#fff;padding:15px'
+                    }
+                    
                   }else{
                     r = 'background-color:#000;color:#fff;padding:15px'
                   }
@@ -512,6 +542,17 @@
                 });
                 pnl.append('div').text(d=>d.length>0?('Kumpulan: ' + d[0].nama_kumpulan):'');
                 pnl.append('div').text(d=>d.length>0?('Pengiring: ' + d[0].pengiring):'');
+                
+                pnl.append('div').classed('hide',d=>{
+                  hide = true;
+                  if(d.length>0){
+                    if(d[0].status_peserta==1){
+                      hide=false
+                    }
+                  }
+                  return hide
+                }).text('* Penyertaan dibatalkan kerana tidak memenuhi atau melanggar syarat ditetapkan');
+                
 
                 tbl = o.append('table').attr('class','table width-full');
                 trh = tbl.append('thead').append('tr');
