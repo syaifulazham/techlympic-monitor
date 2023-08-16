@@ -518,7 +518,7 @@
                 trh.selectAll('th').data(['#','Nama','KP']).enter().append('th').text(d=>d);
                 tbdy = tbl.append('tbody');
                 tbdy.selectAll('tr').data(d=>d).enter().append('tr').call(tr=>{
-                  tr.append('td').attr('style',d=>d.hadir==1?'background-color:#1b67f5;color:#fff':'').text((d,i)=>i);
+                  tr.append('td').attr('style',d=>'text-align:center;' + (d.hadir==1?'background-color:#1b67f5;color:#fff':'')).text((d,i)=>i+1);
                   tr.append('td').text(d=>d.nama);
                   tr.append('td').attr('style','width:40px').text(d=>d.kp);
                 })
