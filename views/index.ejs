@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Techlympics Management Panel</title>
-  <link rel="stylesheet" href="./main.css?v2.0.1">
+  <link rel="stylesheet" href="./main.css?v2.5.0">
 
 </head>
 <body>
@@ -489,10 +489,15 @@
             comp.selectAll('*').remove();
             comp.selectAll('.pertandingan').data(sekolah).enter().append('div').call(o=>{
               p = o.attr('class','pertandingan f-column width-full');
-              h = p.append('div').attr('class','pertandingan-header f-row width-full');
-              h.append('div').attr('class','nama-negeri').text(d=>d.negeri);
+              h = p.append('div').attr('style','cursor:pointer').attr('class','pertandingan-header f-row width-full');
+              h.append('img').attr('class','img-negeri').attr('src',d=>'./img/states/' + d.negeri + '.png');
               h.append('div').attr('class','nama-sekolah f-grow-2').text(d=>d.namasekolah);
-              grp = p.append('div').attr('class','f-row width-full f-center');
+
+              h.on('click',(e)=>{
+                $(e.currentTarget).parent().find('.panel-kumpulan').toggleClass('hide');
+              })
+
+              grp = p.append('div').attr('class','f-row width-full f-center panel-kumpulan hide');
               grp.selectAll('.table-group').data(d=>[d.k1,d.k2]).enter().append('div').call(o=>{
                 o.attr('class',d=>'table-group width-50 f-gap-2 f-column ' + (d.length===0?'hide':''));
 
