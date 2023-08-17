@@ -149,7 +149,7 @@
           <div class="panel-header">Dashboard</div>
         </div>
         <div class="bottom">
-          <div class="panel-header">TOTAL KEHADIRAN</div>
+          <div class="panel-header f-row">TOTAL KEHADIRAN<div class="clock float-right">00:00:00</div></div>
           <table class="table">
             <thead>
               <tr class="hd-dashboard">
@@ -166,7 +166,7 @@
           </table>
 
           
-          <div class="panel-header">KEHADIRAN SEKOLAH RENDAH</div>
+          <div class="panel-header f-row">KEHADIRAN SEKOLAH RENDAH <div class="clock float-right">00:00:00</div></div>
           <table class="table">
             <thead>
               <tr class="hd-dashboard">
@@ -183,7 +183,7 @@
           </table>
 
           
-          <div class="panel-header">KEHADIRAN SEKOLAH MENENGAH</div>
+          <div class="panel-header f-row">KEHADIRAN SEKOLAH MENENGAH<div class="clock float-right">00:00:00</div></div>
           <table class="table">
             <thead>
               <tr class="hd-dashboard">
@@ -220,6 +220,17 @@
 
   <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <script>
+    function getCurrentTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const currentTime = `${hours}:${minutes}:${seconds}`;
+        return currentTime;
+    }
+</script>
 
   <script>
     function distinct(array) {
@@ -307,11 +318,12 @@
 
       generate: {
         qrcode(inputData, fn){
+          console.log('inputData: ',inputData)
           $.ajax({
             type: 'POST',
             url: '/api/qr/generate',
-            contentType: 'application/json',
-            data: JSON.stringify({ data: inputData }),
+            dataType: 'json',
+            data: { qrstring: inputData },
             success: function(response) {
               fn(response.qrCodeImage);
               //$('#qrCodeImage').attr('src', response.qrCodeImage);
@@ -401,6 +413,7 @@
 
 
     $(document).ready(()=>{
+
       /*popup and copy handling*/
         $('#btnClose').on('click',()=>{
           $('.popup').addClass('hide');
@@ -475,6 +488,12 @@
 
           })
         }
+
+        setInterval(()=>{
+          t = getCurrentTime();
+          $('.clock').text(t);
+        }, 1000);
+
         loadStatsHadir('');
         setInterval(()=>{loadStatsHadir('')}, 10000);
         

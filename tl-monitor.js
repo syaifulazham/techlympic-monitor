@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
 
 
 app.post('/api/qr/generate', async (req, res) => {
-  const { data } = req.body;  
+  const data = req.body.qrstring;  
 
   if (!data) {
     return res.status(400).json({ error: 'Data is required in the request body.' });
