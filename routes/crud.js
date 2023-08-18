@@ -526,11 +526,11 @@ let API = {
                 console.log(e);
             }
         },
-        getPeserta(kod, fn){
+        getPeserta(zon, kod, fn){
             var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
             try {
                 con.query(`
-                select * from aa_utara_hadir where prog_code = ? and usr_role in('Guru','Ibu Bapa')
+                select * from aa_${zon}_hadir where prog_code = ? and usr_role in('Guru','Ibu Bapa')
               `, [kod],function (err, result) {
                     if (err) {
                         console.log('but with some error: ',err);

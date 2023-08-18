@@ -68,7 +68,7 @@
 
       <div class="panel-body body-kehadiran hide">
         <div class="top">
-          <div class="panel-header">Kehadiran</div>
+          <div class="panel-header">Agihan Token Borang</div>
           <div class="field-group">
             <div class="field-label">Jenis Borang</div>
             <div class="field f-grow-2">
@@ -114,9 +114,9 @@
         </div>
       </div>
 
-      <div class="panel-body body-walkin hide">
+      <div class="panel-body body-peserta hide">
         <div class="top">
-          <div class="panel-header">Pendaftaran Walk-in</div>
+          <div class="panel-header">Peserta</div>
         </div>
         <div class="bottom">
 
@@ -292,11 +292,11 @@
         });
       },
 
-      loadPeserta(kod, fn){
+      loadPeserta(zon, kod, fn){
         $.ajax({
           type: "POST",
           url: '/api/pertandingan/loadpeserta',
-          data: {kod:kod},
+          data: {zon:zon, kod:kod},
           success: (result)=>{
             fn(result)
           }
@@ -380,8 +380,8 @@
   <script>
     var MENUS = {
       fizikal:[
-        {label: 'Kehadiran', link:'./kehadiran', render: ()=>{$('.panel-body').addClass('hide');$('.body-kehadiran').removeClass('hide');}},
-        {label: 'Walk-in', link:'./walkin', render: ()=>{$('.panel-body').addClass('hide');$('.body-walkin').removeClass('hide');}},
+        {label: 'Borang', link:'./kehadiran', render: ()=>{$('.panel-body').addClass('hide');$('.body-kehadiran').removeClass('hide');}},
+        {label: 'Peserta', link:'./peserta', render: ()=>{$('.panel-body').addClass('hide');$('.body-peserta').removeClass('hide');}},
         {label: 'Pertandingan', link:'./pertandingan', render: ()=>{$('.panel-body').addClass('hide');$('.body-pertandingan').removeClass('hide');}},
         {label: 'Dashboard', link:'./dashboard', render: ()=>{$('.panel-body').addClass('hide');$('.body-dashboard').removeClass('hide');}}
       ],
@@ -509,8 +509,10 @@
 
         $('#btnPertandingan').on('click', ()=>{
           console.log($('#cmbpertandingan').val());
+
+          var zon = $('.zon.selected').attr('zon');
           var kod = $('#cmbpertandingan').val();
-          api.loadPeserta(kod, data=>{
+          api.loadPeserta(zon, kod, data=>{
             console.log(data);
             var _kodsekolah = [];
             data.forEach(d=>{_kodsekolah.push(d.kodsekolah)});

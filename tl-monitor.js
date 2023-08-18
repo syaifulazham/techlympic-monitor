@@ -246,9 +246,10 @@ app.post('/api/pertandingan/loadpertandingan', (req,res)=>{
 });
 
 app.post('/api/pertandingan/loadpeserta', (req,res)=>{
-  console.log('/api/pertandingan/loadpeserta');
+  //console.log('/api/pertandingan/loadpeserta');
+  var zon = req.body.zon;
   var kod = req.body.kod;
-  api.pertandingan.getPeserta(kod, result=>{
+  api.pertandingan.getPeserta(zon, kod, result=>{
     res.send(result);
   })
 });
