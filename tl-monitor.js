@@ -237,6 +237,16 @@ app.post('/api/borangqr/loadusers', (req,res)=>{
 });
 
 /*----------------------------PERTANDINGAN-----------------------*/
+
+app.post('/api/pertandingan/loadsekolah', (req,res)=>{
+  //console.log('/api/pertandingan/loadpeserta');
+  var zon = req.body.zon;
+  var peringkat = req.body.peringkat;
+  api.pertandingan.getSekolah(zon, peringkat, result=>{
+    res.send(result);
+  })
+});
+
 app.post('/api/pertandingan/loadpertandingan', (req,res)=>{
   var jenis = req.body.jenis;
   var peringkat = req.body.peringkat;
@@ -250,6 +260,18 @@ app.post('/api/pertandingan/loadpeserta', (req,res)=>{
   var zon = req.body.zon;
   var kod = req.body.kod;
   api.pertandingan.getPeserta(zon, kod, result=>{
+    res.send(result);
+  })
+});
+
+app.post('/api/pertandingan/search', (req,res)=>{
+  //console.log('/api/pertandingan/loadpeserta');
+  var zon = req.body.zon;
+  var peringkat = req.body.peringkat;
+  var kod = req.body.kod;
+  var sekolah = req.body.sekolah;
+  var srch = req.body.srcstr;
+  api.pertandingan.searchPeserta(zon, peringkat, kod, sekolah, srch, result=>{
     res.send(result);
   })
 });

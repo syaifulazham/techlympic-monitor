@@ -506,6 +506,25 @@ let API = {
     },
 
     pertandingan:{
+        getSekolah(zon, peringkat, fn){
+            var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+            try {
+                con.query(`
+                select distinct kodsekolah,namasekolah from aa_${zon}_hadir where peringkat = ? order by kodsekolah
+              `, [peringkat],function (err, result) {
+                    if (err) {
+                        console.log('but with some error: ',err);
+                    } else {
+                        console.log('... with some data: ',result);
+                        con.end();
+                        
+                        fn(result);
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        },
         getPertandingan(jenis, peringkat, fn){
             console.log('---------------->-@',jenis,peringkat)
             var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
@@ -532,6 +551,59 @@ let API = {
                 con.query(`
                 select * from aa_${zon}_hadir where prog_code = ? and usr_role in('Guru','Ibu Bapa')
               `, [kod],function (err, result) {
+                    if (err) {
+                        console.log('but with some error: ',err);
+                    } else {
+                        console.log('... with some data: ',result);
+                        con.end();
+                        
+                        fn(result);
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        },
+        searchPeserta(zon, peringkat, kod, sekolah, srch, fn){
+            var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+            try {
+                var srcperingkat = (peringkat!==''?'and peringkat = ?':'');
+                var scrkod = (kod!==''?'and prog_code = ?':'');
+                var srcsekolah = (sekolah!==''?'and kodsekolah = ?':'');
+                var srcstr = (srch!==''?'and (ucase(nama) regexp ucase(?) or ucase(namasekolah) regexp ucase(?))':'');
+
+                var param = []
+
+                //param.push(zon);
+
+                if(srcperingkat!==''){
+                    param.push(peringkat)
+                }
+                
+                if(scrkod!==''){
+                    param.push(kod)
+                }
+                
+                if(srcsekolah!==''){
+                    param.push(sekolah)
+                }
+                
+                if(srcstr!==''){
+                    param.push(srch);
+                    param.push(srch);
+                }
+
+                console.log('PARAM------------------>>>>>>>',param);
+
+                const sqlstr = `
+                select * from aa_${zon}_hadir where usr_role in('Guru','Ibu Bapa') 
+                ${srcperingkat} ${scrkod} ${srcsekolah} ${srcstr}
+                order by kodsekolah, pertandingan, kumpulan
+              `;
+
+              console.log(sqlstr);
+                
+                con.query(sqlstr, param,function (err, result) {
                     if (err) {
                         console.log('but with some error: ',err);
                     } else {

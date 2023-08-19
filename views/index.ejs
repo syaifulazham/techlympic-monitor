@@ -3,6 +3,7 @@
 <head>
   <title>Techlympics Management Panel</title>
   <link rel="stylesheet" href="./main.css?v2.5.0">
+  <link rel="stylesheet" type="text/css" href="./assets/fontawesome/css/solid.min.css" crossorigin="anonymous">
 
 </head>
 <body>
@@ -117,9 +118,46 @@
       <div class="panel-body body-peserta hide">
         <div class="top">
           <div class="panel-header">Peserta</div>
+          <div class="field-group bg-white">
+            <select name="cmbperingkat2" id="cmbperingkat2">
+              <option value="">Semua Peringkat</option>
+              <option value="Rendah">Rendah</option>
+              <option value="Menengah">Menengah</option>
+            </select>
+            
+            <select name="cmbpertandingan2" id="cmbpertandingan2">
+              
+            </select>
+            
+            <select name="cmbsekolah2" id="cmbsekolah2">
+              
+            </select>
+
+          </div>
+          <div class="field-group bg-white">
+            <input type="text" id="srcnama" class="f-grow-1">
+            <button class="button" id="btn-search">Cari</button>
+          </div>
         </div>
         <div class="bottom">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Sekolah</th>
+                <th>Nama</th>
+                <th>KP</th>
+                <th>Pertandingan</th>
+                <th>Kumpulan</th>
+                <th>Nama Kumpulan</th>
+                <th>Pengiring</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tbdy-search">
 
+            </tbody>
+          </table>
         </div>
       </div>
       
@@ -205,21 +243,67 @@
     
   </div>
 
-  <div class="popup hide">
-    <div class="popup-body">
+  <div id="popup-link" class="popup hide">
+    <div class="popup-body width-500">
       <div class="popup-header">
         <button class="button float-right" id="btnCopy">Salin</button>
-        <button class="button" id="btnClose">X</button>
+        <button class="button btnClose" id="btnClose">X</button>
       </div>
       <div id="link-panel">
         
       </div>
-      <img src="" alt="" id="img-qr">
+      <div class="f-row width-full bg-white f-center">
+        <img src="" alt="" id="img-qr">
+      </div>
+      
+    </div>
+  </div>
+
+  <div id="popup-edit" class="popup hide">
+    <div class="popup-body width-80">
+      <div class="popup-header">
+        <div>Kemaskini</div>
+        <button class="button float-right btnClose">X</button>
+      </div>
+      <div id="edit-panel" class="bg-white">
+        <table class="table">
+          <tbody>
+            <tr>
+              <td style="width: 120px;">Nama Kumpulan</td>
+              <td><input type="text" placeholder="nama kumpulan..." id="edt-kumpulan" style="border: 0;" class="width-80"></td>
+            </tr>
+            <tr>
+              <td>Pengiring</td>
+              <td><input type="text" placeholder="nama guru pengiring..." id="edt-pengiring" style="border: 0;" class="width-80"></td>
+            </tr>
+          </tbody>
+        </table>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nama</th>
+              <th>KP</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbdy-edit">
+
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="popup-header float-buttom">
+        <button class="button float-right" id="btnSaveEdit">Simpan</button>
+        
+      </div>
     </div>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  
+  <script src="./assets/fontawesome/js/d0267849d0.js" crossorigin="anonymous"></script>
 
   <script>
     function getCurrentTime() {
@@ -281,6 +365,17 @@
         });
       },
 
+      loadSekolah(zon, peringkat, fn){
+        $.ajax({
+          type: "POST",
+          url: '/api/pertandingan/loadsekolah',
+          data: {zon:zon, peringkat:peringkat},
+          success: (result)=>{
+            fn(result)
+          }
+        });
+      },
+
       loadPertandingan(jenis, peringkat, fn){
         $.ajax({
           type: "POST",
@@ -297,6 +392,25 @@
           type: "POST",
           url: '/api/pertandingan/loadpeserta',
           data: {zon:zon, kod:kod},
+          success: (result)=>{
+            fn(result)
+          }
+        });
+      },
+
+      searchPeserta(zon, peringkat, kod, sekolah, srcstr, fn){
+        var data = {
+          zon: zon,
+          peringkat: peringkat,
+          kod: kod,
+          sekolah: sekolah,
+          srcstr: srcstr
+        }
+
+        $.ajax({
+          type: "POST",
+          url: '/api/pertandingan/search',
+          data: data,
           success: (result)=>{
             fn(result)
           }
@@ -353,7 +467,7 @@
               api.generate.qrcode(m, gen=>{
                 $('#img-qr').attr('src',gen);
               });
-              $('.popup').removeClass('hide');
+              $('.popup#popup-link').removeClass('hide');
               $('#link-panel').html('Link: ' + window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token +'  Passcode: ' + d.pwd)
             }).text('...')
           })
@@ -415,7 +529,7 @@
     $(document).ready(()=>{
 
       /*popup and copy handling*/
-        $('#btnClose').on('click',()=>{
+        $('.btnClose').on('click',()=>{
           $('.popup').addClass('hide');
         });
 
@@ -450,12 +564,119 @@
 
         loadPertandingan();
 
+        
+        function loadPertandingan2(){
+          var peringkat = $('#cmbperingkat2').val();
+            api.loadPertandingan('fizikal', peringkat, data=>{
+              console.log(data);
+              d3.select('#cmbpertandingan2').selectAll('option').remove();
+              d3.select('#cmbpertandingan2').append('option').attr('value','');
+              d3.select('#cmbpertandingan2').selectAll('.option-pertandingan').data(data).enter().append('option').call(o=>{
+                o.attr('class','option-pertandingan').attr('value',d=>d.prog_code).text(d=>d.prog_name);
+              });
+            })
+        }
+
+        function loadSekolah(){
+          var zon = $('.zon.selected').attr('zon');
+          var peringkat = $('#cmbperingkat2').val();
+            api.loadSekolah(zon, peringkat, data=>{
+              console.log(data);
+              d3.select('#cmbsekolah2').selectAll('option').remove();
+              d3.select('#cmbsekolah2').append('option').attr('value','');
+              d3.select('#cmbsekolah2').selectAll('.option-sekolah').data(data).enter().append('option').call(o=>{
+                o.attr('class','option-sekolah').attr('value',d=>d.kodsekolah).text(d=>d.namasekolah + ' (' + d.kodsekolah + ')');
+              });
+            })
+        };
+
+        function renderEdit(data){
+          $('#edt-kumpulan').val(data[0].nama_kumpulan);
+          $('#edt-pengiring').val(data[0].pengiring);
+          d3.select('#tbdy-edit').selectAll('tr').data(data).enter().append('tr').call(o=>{
+            o.append('td').text((d, i)=>i+1);
+            o.append('td').text(d=>d.nama);
+            o.append('td').text(d=>d.kp);
+            var actiontd = o.append('td');
+            btnchange = actiontd.append('button').append('i').attr('class','fa-solid fa-shuffle');
+            btnrem = actiontd.append('button').append('i').attr('class','fa-regular fa-circle-xmark');
+          });
+        }
+
+        //loadPertandingan();
+
+        var goSearch = () => {
+          var zon = $('.zon.selected').attr('zon');
+            var peringkat = $('#cmbperingkat2').val();
+            var kod = $('#cmbpertandingan2').val();
+            var sekolah = $('#cmbsekolah2').val();
+            var srcstr = $('#srcnama').val();
+          api.searchPeserta(zon, peringkat, kod, sekolah, srcstr, data=>{
+            console.log(data);
+            tbdy = d3.select('#tbdy-search');
+            tbdy.selectAll('*').remove();
+            tbdy.selectAll('tr').data(data).enter().append('tr').call(o=>{
+              o.attr('class',d=>'p-' + d.kodsekolah.replace('*','').replace(' ','').toUpperCase() + '-' + d.prog_code.replace('.','') + '-' + d.kumpulan);
+              o.on('mouseover', (e, d)=>{
+                $('.p-' + d.kodsekolah.replace('*','').replace(' ','').toUpperCase() + '-' + d.prog_code.replace('.','') + '-' + d.kumpulan).addClass('bg-highlight')
+              }).on('mouseout', (e, d)=>{
+                $('.p-' + d.kodsekolah.replace('*','').replace(' ','').toUpperCase() + '-' + d.prog_code.replace('.','') + '-' + d.kumpulan).removeClass('bg-highlight')
+              })
+              o.append('td').text((d,i)=>i+1);
+              sek = o.append('td');
+              var btn_kodsekolah = sek.append('div').attr('style','font-weight:bold').text(d=>d.kodsekolah);
+              btn_kodsekolah.on('click', (e, d)=>{
+                $('#cmbsekolah2').val(d.kodsekolah);
+                $('#cmbpertandingan2').val('');
+                $('#srcnama').val('');
+
+                goSearch();
+              }).on('mouseover', (e, d)=>{
+                $(e.currentTarget).attr('style','font-weight:bold;color:blue;cursor:pointer;');
+              }).on('mouseout', (e, d)=>{
+                $(e.currentTarget).attr('style','font-weight:bold;color:black');
+              });
+              var btn_namasekolah = sek.append('div').text(d=>d.namasekolah);
+              //o.append('td').html(d=>'<div style="font-weight:bold">' + d.kodsekolah + '</div>' + d.namasekolah);
+              o.append('td').text(d=>d.nama);
+              o.append('td').text(d=>d.kp);
+              var btn_pertandingan = o.append('td').text(d=>d.pertandingan);
+              btn_pertandingan.on('click', (e, d)=>{
+                $('#cmbsekolah2').val('');
+                $('#cmbpertandingan2').val(d.prog_code);
+                $('#srcnama').val('');
+
+                goSearch();
+              }).on('mouseover', (e, d)=>{
+                $(e.currentTarget).attr('style','color:blue;cursor:pointer;');
+              }).on('mouseout', (e, d)=>{
+                $(e.currentTarget).attr('style','color:black');
+              });
+
+              o.append('td').text(d=>d.kumpulan);
+              o.append('td').text(d=>d.nama_kumpulan);
+              o.append('td').text(d=>d.pengiring);
+
+              btnedit = o.append('td').append('button').text('Edit...');
+              btnedit.on('click', (e, d) => {
+                $('.popup#popup-edit').removeClass('hide');
+                edt_data =  d3.selectAll('#tbdy-search > tr').data().filter(a=>a.kodsekolah===d.kodsekolah && a.prog_code === d.prog_code && a.kumpulan === d.kumpulan);
+                renderEdit(edt_data);
+              });
+            });
+          });
+        }
+
+        $('#btn-search').on('click', ()=>{
+          goSearch();
+        });
+
 
         /*--------------------------DASHBOARD--------------------------*/
         function loadStatsHadir(peringkat){
           var zon = $('.zon.selected').attr('zon');
           api.stats.kehadiran(zon, peringkat, data=>{
-            console.log(data);
+            //console.log(data);
 
             var total={
               kehadiran: 'TOTAL',
@@ -505,6 +726,10 @@
 
         $('#cmbperingkat').on('change',()=>{
           loadPertandingan();
+        });
+        $('#cmbperingkat2').on('change',()=>{
+          loadPertandingan2();
+          loadSekolah();
         });
 
         $('#btnPertandingan').on('click', ()=>{
@@ -590,6 +815,10 @@
           });
         });
       /*--------------------------------------*/
+
+        $('#btnSearch').on('click', ()=>{
+
+        });
 
         $('#addUser').on('click', ()=>{
           saveUserBorangQR();
