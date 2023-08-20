@@ -593,6 +593,7 @@
         function renderEdit(data){
           $('#edt-kumpulan').val(data[0].nama_kumpulan);
           $('#edt-pengiring').val(data[0].pengiring);
+          d3.select('#tbdy-edit').selectAll('tr').remove();
           d3.select('#tbdy-edit').selectAll('tr').data(data).enter().append('tr').call(o=>{
             o.append('td').text((d, i)=>i+1);
             o.append('td').text(d=>d.nama);
