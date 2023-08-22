@@ -249,7 +249,7 @@
                         d3.select('.welcome-me').append('div').attr('class','width-full welcome-text welcome align-center text-slide-out ' +( (r.nama)?'':'red-alert')).text((r.nama)?'Selamat Menjamu Selera':'Token Anda Telah Digunakan');
                         d3.select('.welcome-me').append('div').attr('class','width-full welcome-text align-center text-slide-out').text(r.nama);
 
-                        d3.select('#lblwelcome').attr('style','color:yellow').attr('class','field width-full text-center qrcam ' + ((r.nama)?'':'red-alert')).text((r.nama)?('Selamat Menjamu Selera ' + r.nama):'Token Anda Telah Digunakan');
+                        d3.select('#lblwelcome').attr('style','color:yellow').attr('class','field width-full text-center qrcam ' + ((r.nama)?'':'red-alert')).html((r.nama)?('Selamat Menjamu Selera<br />' + r.nama):'Token Anda Telah Digunakan');
         })
         .catch((error) => {
           console.error('Error sending/capturing image:', error);
