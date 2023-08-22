@@ -4,13 +4,14 @@
     <title>Techlympics 2023 | KEHADIRAN</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../qrpage-green.css?v=1.5">
+    <link rel="stylesheet" type="text/css" href="../assets/fontawesome/css/solid.min.css" crossorigin="anonymous">
 </head>
 <body>
   <%if(!session){%>
     <%- include ('__passcode_meal.ejs') %>
   <%}else{%>
     <div class="container">
-        <img src="../img/meals-3.png" alt="" class="img-bg">
+        <!--<img src="../img/meals-3.png" alt="" class="img-bg">-->
         <div class="nav">
           <div class="nav-menus">
             <div class="brand">Techlympics 2023 | Meals</div>
@@ -21,7 +22,7 @@
               ZON <%=session.user.data.zon.toUpperCase()%>
             </div>
             <div id="btnToggleCam" class="nav-item">
-              [--]
+              <i class="fa-solid fa-camera"></i>
             </div>
           </div>
         </div>
@@ -41,6 +42,8 @@
               </div>
               <div class="field-group">
                 <div class="field width-full text-center" id="lblSekolah"><%=session.user.data.notes%></div>
+              </div><div class="field-group">
+                <div class="field width-full text-center qrcam hide" id="lblwelcome"></div>
               </div>
             </div>
             <div style="z-index: 99999999;" class="f-column width-full f-center qrcam hide">
@@ -52,7 +55,7 @@
               <div id="scan-results"></div>
             </div>
             <div class="f-row f-center qrcam hide float-bottom">
-              <div id="toggle-camera">[o]</div>
+              <div id="toggle-camera"><i class="fa-solid fa-camera-rotate"></i></div>
               <div id="qrimbas">IMBAS</div>
             </div>
             <div class="bottom welcome-me f-column center">
@@ -68,6 +71,7 @@
 
     <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="../assets/fontawesome/js/d0267849d0.js" crossorigin="anonymous"></script>
 
     <script>
         function getCurrentTime() {
@@ -109,7 +113,7 @@
     </script>
     <script>
         $(document).ready(()=>{
-            $('#qrimbas').on('click', ()=>{
+            $('#qrimbas, #video-preview').on('click', ()=>{
               captureFrame();
             });
             $('#toggle-camera').on('click', ()=>{
@@ -135,6 +139,8 @@
                         d3.selectAll('.welcome-text').remove();
                         d3.select('.welcome-me').append('div').attr('class','width-full welcome-text welcome align-center text-slide-out ' +( (r.nama)?'':'red-alert')).text((r.nama)?'Selamat Menjamu Selera':'Token Anda Telah Digunakan');
                         d3.select('.welcome-me').append('div').attr('class','width-full welcome-text align-center text-slide-out').text(r.nama);
+
+                        
                     }
                     
                 });
@@ -242,6 +248,8 @@
                         d3.selectAll('.welcome-text').remove();
                         d3.select('.welcome-me').append('div').attr('class','width-full welcome-text welcome align-center text-slide-out ' +( (r.nama)?'':'red-alert')).text((r.nama)?'Selamat Menjamu Selera':'Token Anda Telah Digunakan');
                         d3.select('.welcome-me').append('div').attr('class','width-full welcome-text align-center text-slide-out').text(r.nama);
+
+                        d3.select('#lblwelcome').attr('style','color:yellow').attr('class','field width-full text-center qrcam ' + ((r.nama)?'':'red-alert')).text((r.nama)?('Selamat Menjamu Selera ' + r.nama):'Token Anda Telah Digunakan');
         })
         .catch((error) => {
           console.error('Error sending/capturing image:', error);
