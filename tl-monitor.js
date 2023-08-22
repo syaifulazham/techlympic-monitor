@@ -6,6 +6,9 @@ const app = express();
 const axios = require('axios');
 const path = require('path');
 
+const { createCanvas, loadImage } = require('canvas');
+const jsQR = require('jsqr');
+
 const api = require("./routes/crud");
 
 let __DATA__SCHEMA__ = 'techlympic';
@@ -18,7 +21,8 @@ app.use(express.urlencoded({ extended: false }));
 
 //set cookies
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -148,6 +152,58 @@ app.post('/api/meal/peserta', (req, res) =>{
     }
     
   })
+});
+
+app.post('/api/meal-cam/peserta', (req, res) => {
+  const imageData = req.body.imageData;
+
+  console.log('body capture:==========>>>>',req.body);
+  const base64Data = imageData.replace(/^data:image\/png;base64,/, '');
+
+  const buffer = Buffer.from(base64Data, 'base64');
+  var session = req.cookies['eventmeal'];
+  var zon = session.user.data.zon;
+  var role = session.user.data.role;
+  var pembekal = session.user.data.name;
+
+  var mealset = (role==='Penyerahan Makanan I'?1:2);
+
+  loadImage(buffer)
+      .then((image) => {
+          const canvas = createCanvas(image.width, image.height);
+          const context = canvas.getContext('2d');
+          context.drawImage(image, 0, 0);
+          const imageData = context.getImageData(0, 0, image.width, image.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+          if (code) {
+              console.log('Scanned content:', code.data);
+              var qr = code.data;
+              api.attandance.getQRcode(zon, qr, (dataqr)=>{
+                if(dataqr){
+                  if(dataqr[0]['meal' + mealset] === null){
+                    api.attandance.getmeal(role, pembekal, zon, qr, result=>{
+                      res.send(dataqr);
+                    })
+                  }else{
+                    res.send([{msg:'Telah daftar masuk'}])
+                  }
+                }else{
+                  res.send([{msg:'Tiada dalam rekod'}])
+                }
+                
+              })
+              // Do something with the scanned content
+              
+          } else {
+              //console.error('No QR code found.');
+              res.sendStatus(400);
+          }
+      })
+      .catch((error) => {
+          //console.error('Error loading image:', error);
+          res.sendStatus(500);
+      });
 });
 
 

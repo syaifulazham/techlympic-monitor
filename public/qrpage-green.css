@@ -448,6 +448,33 @@ body{
     border: 0 solid #fff;
 }
 
+#qrimbas{
+    padding: 20px;
+    width: 100px;
+    background-color: #245e02;
+    text-align: center;
+    border: 1px solid #fff6;
+    border-radius: 8px;
+    z-index: 99999999999;
+}
+
+#qrimbas:hover{
+    background-color: #29b107;
+}
+
+#toggle-camera{
+    padding: 20px;
+    width: 30px;
+    background-color: #245e02;
+    text-align: center;
+    border: 1px solid #fff6;
+    border-radius: 8px;
+    z-index: 99999999999;
+}
+
+#toggle-camera:hover{
+    background-color: #29b107;
+}
 
 .hide{
     display: none;
