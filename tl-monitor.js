@@ -346,6 +346,13 @@ app.post('/api/count/daily', (req, res) =>{
 });
 
 
+app.get('/api/alldaftar', (req, res) =>{
+  api.static.daftar((data)=>{
+    res.send(data);
+  })
+});
+
+
 app.post('/chat', async (req, res) => {
   console.log('=================================>>>>>>',req.body.message);
   const message = req.body.message;

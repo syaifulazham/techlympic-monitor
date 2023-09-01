@@ -5,6 +5,27 @@ let __DATA__SCHEMA__ = 'techlympic';
 
 
 let API = {
+    static:{
+        daftar(fn){
+            var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+            try {
+                con.query(`
+                SELECT * FROM static_pendaftaran WHERE peringkat IN ('Rendah','Menengah');
+              `, function (err, result) {
+                    if (err) {
+                        console.log('but with some error: ',err);
+                    } else {
+                        console.log('... with some data: ',result);
+                        con.end();
+                        
+                        fn(result);
+                    }
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    },
     count: {
         users: (fn) =>{
             var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
