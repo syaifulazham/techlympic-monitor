@@ -338,15 +338,27 @@ let API = {
                         SELECT if(usr_role IN('Ibu Bapa','Guru'),'Peserta',usr_role) kehadiran, 
                             COUNT(*) jangka_hadir, SUM(if(hadir=1,1,0)) telah_hadir, 
                             SUM(if(hadir=0,1,0)) belum_hadir
-                        FROM (SELECT a.* from aa_${zon}_hadir a LEFT JOIN program b USING(prog_code) WHERE (prog_desc = 'fizikal' OR usr_role IN('Guru Pengiring','Penjaga','Media','VIP')) and peringkat = ?) a  GROUP BY kehadiran;
+                        FROM (SELECT a.* from aa_${zon}_hadir a WHERE usr_role IN('Guru','Guru Pengiring','Penjaga','Media','VIP') and peringkat = ?) a  GROUP BY kehadiran;
                     `
+                    /*
+                    SELECT if(usr_role IN('Ibu Bapa','Guru'),'Peserta',usr_role) kehadiran, 
+                            COUNT(*) jangka_hadir, SUM(if(hadir=1,1,0)) telah_hadir, 
+                            SUM(if(hadir=0,1,0)) belum_hadir
+                        FROM (SELECT a.* from aa_${zon}_hadir a LEFT JOIN program b USING(prog_code) WHERE (prog_desc <> 'none' OR usr_role IN('Guru Pengiring','Penjaga','Media','VIP')) and peringkat = ?) a  GROUP BY kehadiran;
+                    */
                     }else{
                         sqlstr = `
                         SELECT if(usr_role IN('Ibu Bapa','Guru'),'Peserta',usr_role) kehadiran, 
                             COUNT(*) jangka_hadir, SUM(if(hadir=1,1,0)) telah_hadir, 
                             SUM(if(hadir=0,1,0)) belum_hadir
-                        FROM (SELECT a.* from aa_${zon}_hadir a LEFT JOIN program b USING(prog_code) WHERE prog_desc = 'fizikal' OR usr_role IN('Guru Pengiring','Penjaga','Media','VIP')) a  GROUP BY kehadiran;
+                        FROM (SELECT a.* from aa_${zon}_hadir a WHERE usr_role IN('Guru','Guru Pengiring','Penjaga','Media','VIP')) a  GROUP BY kehadiran;
                     `
+                    /*
+                     SELECT if(usr_role IN('Ibu Bapa','Guru'),'Peserta',usr_role) kehadiran, 
+                            COUNT(*) jangka_hadir, SUM(if(hadir=1,1,0)) telah_hadir, 
+                            SUM(if(hadir=0,1,0)) belum_hadir
+                        FROM (SELECT a.* from aa_${zon}_hadir a LEFT JOIN program b USING(prog_code) WHERE prog_desc <> 'none' OR usr_role IN('Guru Pengiring','Penjaga','Media','VIP')) a  GROUP BY kehadiran;
+                    */
                     }
                     con.query(sqlstr, [peringkat], function (err, result) {
                         if (err) {
