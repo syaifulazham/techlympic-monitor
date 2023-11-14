@@ -98,6 +98,36 @@ app.get('/hadir/logout', function (req, res, next) {
 });
 
 
+app.get('/semak/:token', (req, res) => {
+  var session = req.cookies['eventkehadiran'];
+  if(!session){
+    res.render('check',{message:'', session: undefined});
+  }else if(req.params.token===session.user.data.token){
+    console.log('-----A')
+    res.render('check',{message:'', session: session});
+  }else{
+    console.log('-----B')
+    res.render('check',{message:'', session: undefined});
+  }
+  
+});
+
+app.post('/api/semak/login', (req, res)=>{
+  var pass = req.body.pwd;
+  var token = req.body.token;
+  api.attandance.user.login_check(token, pass, user=>{
+    console.log('LOGIN====>',user);
+    if(user.authorized){
+      res.cookie('eventkehadiran', {user:user});
+      res.send({authorized:true});
+    }else{
+      res.send(user);
+    }
+    
+  });
+});
+
+
 app.get('/meal/:token', (req, res) => {
   var session = req.cookies['eventmeal'];
   if(!session){
@@ -255,6 +285,21 @@ app.post('/api/hadir/peserta', (req, res) =>{
       }else{
         res.send([{msg:'Telah daftar masuk'}])
       }
+    }else{
+      res.send([{msg:'Tiada dalam rekod'}])
+    }
+    
+  })
+});
+
+app.post('/api/semak/peserta', (req, res) =>{
+  var qr = req.body.qr;
+  var session = req.cookies['eventkehadiran'];
+  var zon = session.user.data.zon;
+  console.log(qr);
+  api.attandance.getQRcode(zon, qr, (dataqr)=>{
+    if(dataqr){
+      res.send(dataqr);
     }else{
       res.send([{msg:'Tiada dalam rekod'}])
     }

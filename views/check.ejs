@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Techlympics 2023 | SEMAK PESERTA</title>
+    <link rel="stylesheet" href="../qrpage-semak.css">
+</head>
+<body>
+  <%if(!session){%>
+    <%- include ('__passcode_check.ejs') %>
+  <%}else{%>
+    <div class="container">
+        <div class="nav">
+          <div class="nav-menus">
+            <div class="brand">Techlympics 2023 | SEMAK PESERTA</div>
+            <input id="qrCode" type="text">
+          </div>
+          <div class="nav-menus float-right">
+            <div class="nav-item" onclick="onLogout()">
+              <%=session.user.data.name%> | ZON <%=session.user.data.zon.toUpperCase()%>
+            </div>
+            <script>
+              function onLogout(){
+                  window.location.href = "/hadir/logout";
+              }
+            </script>
+          </div>
+        </div>
+    
+    
+        <div class="panel panel-fizikal">
+          <div id="main-menu-panel" class="panel-menu">
+            
+          </div>
+          
+    
+          <div class="panel-body body-qr ">
+            <div class="top">
+              <!--<div class="panel-header">Kehadiran</div>-->
+              <div class="field-group">
+                <div class="field-label">SEKOLAH <div class="text-smaller italic">School Name</div></div>
+                <div class="field" id="lblSekolah"></div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">PERANAN <div class="text-smaller italic">Role</div> </div>
+                <div class="field" id="lblRole"></div>
+              </div>
+              <div class="field-group">
+                <div class="field-label">NAMA <div class="text-smaller italic">Name</div></div>
+                <div class="field" id="lblNama"></div>
+              </div>
+            </div>
+            <div class="bottom welcome-me f-column center">
+                <div class="text-waiting">...IMBAS KOD QR...</div>
+            </div>
+          </div>
+          
+          
+    
+        </div>
+        
+      </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script>
+        function getCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const currentTime = `${hours}:${minutes}:${seconds}`;
+            return currentTime;
+        }
+    </script>
+    <script>
+        var api = {
+            clockin(qr, fn){
+                $.ajax({
+                        type: "POST",
+                        url: '/api/semak/peserta',
+                        data: {qr: qr},
+                        success: function (res) {
+                            fn(res);
+                        },
+                        dataType: 'json'
+                    });
+                },
+        }
+    </script>
+    <script>
+        $(document).ready(()=>{
+            $('#qrCode').on('change',()=>{
+                var qr = $('#qrCode').val();
+                api.clockin(qr, (data)=>{
+                    if(data){
+                        var r = data[0];
+                        console.log(r);
+                        var ins = d3.select('.panel-menu').insert('div',':first-child').attr('class','list f-row text-slide-out-normal');
+                        ins.append('div').attr('class','time').text(getCurrentTime());
+                        ins.append('div').attr('class','nama').text(r.nama);
+                        $('#lblNama').text(r.nama);
+                        $('#lblRole').text(r.usr_role=='Guru' || r.usr_role=='Ibu Bapa'? ('Peserta ' + r.pertandingan) : r.usr_role);//.text(r.prog_code!==''?('Peserta ' + r.pertandingan):'');
+                        $('#lblSekolah').text(r.kodsekolah + ' | ' + r.namasekolah);
+                        d3.selectAll('.welcome-text').remove();
+                        d3.select('.welcome-me').append('div').attr('class','width-full welcome-text welcome align-center text-slide-out').attr('style',r.status_peserta===1?'background-color:800!important':'').text(r.status_peserta===1?'Penyertaan dibatalkan':'Selamat Datang');
+                        d3.select('.welcome-me').append('div').attr('class','width-full welcome-text align-center text-slide-out').text(r.nama);
+                    }
+                    
+                });
+                
+                $('#qrCode').val('');
+                $('#qrCode').focus();
+            });
+
+            function keepInputFocused() {
+                $("#qrCode").focus();
+            }
+
+            // Call the function every 2 seconds (2000 milliseconds)
+            setInterval(keepInputFocused, 600);
+        });
+
+    </script>
+
+    <%}%>
+</body>
+</html>

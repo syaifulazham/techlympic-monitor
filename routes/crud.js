@@ -522,6 +522,46 @@ let API = {
                     console.log(e);
                 }
             },
+
+            login_check(token, pass, fn){
+                //console.log('Login as: ',uid,pass,auth.auth()[__DATA__SCHEMA__]);
+                if(token=='' || pass=='') return 0;
+                var con = mysql.createConnection(auth.auth()[__DATA__SCHEMA__]);
+                try{
+                    //"SELECT * from peserta WHERE kp = ? and peserta_password = AES_ENCRYPT(kp,CONCAT(?,?))
+                    con.query("SELECT * FROM aa_event_users where token = ? and pwd = ? and userrole regexp 'Semak'",[token, pass], 
+                    function (err, result) {
+                        console.log('result ====> ', result);
+                        if(result.length > 0){
+                            var user = {
+                                name: result[0].username,
+                                notes: result[0].notes,
+                                token: result[0].token,
+                                zon: result[0].zon,
+                                role: result[0].userrole
+                            };
+    
+                            con.end();
+                            
+                            fn({
+                                authorized: true,
+                                msg: 'User Authorized!',
+                                data: user
+                            });
+                        }else {
+                            con.end();
+    
+                            fn({
+                                authorized: false,
+                                msg: 'Incorrect Username of Password',
+                                data: []
+                            })
+                        }
+                    });
+                } catch(e){
+                    console.log(e);
+                }
+            },
         }
 
     },

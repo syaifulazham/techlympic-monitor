@@ -461,9 +461,9 @@
             o.append('td').text(d=>d.username);
             o.append('td').text(d=>d.notes);
             o.append('td').text(d=>d.pwd);
-            o.append('td').append('a').attr('href',d=>window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token).attr('target','_blank').text(d=>(window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token).substring(1,30) + '...');
+            o.append('td').append('a').attr('href',d=>window.location + (d.userrole=='Kehadiran'?'hadir/':(d.userrole=='Makanan'?'meal/':'semak/')) + d.token).attr('target','_blank').text(d=>(window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token).substring(1,30) + '...');
             o.append('td').append('button').on('click',(e, d)=>{
-              m = window.location + (d.userrole=='Kehadiran'?'hadir/':'meal/') + d.token;
+              m = window.location + (d.userrole=='Kehadiran'?'hadir/':(d.userrole=='Makanan'?'meal/':'semak/')) + d.token;
               api.generate.qrcode(m, gen=>{
                 $('#img-qr').attr('src',gen);
               });
