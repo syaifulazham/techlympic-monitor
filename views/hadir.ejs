@@ -37,6 +37,10 @@
             <div class="top">
               <!--<div class="panel-header">Kehadiran</div>-->
               <div class="field-group">
+                <div class="field-label">SERIAL NO <div class="text-smaller italic">No Siri</div></div>
+                <div class="field" id="lblseries"></div>
+              </div>
+              <div class="field-group">
                 <div class="field-label">SEKOLAH <div class="text-smaller italic">School Name</div></div>
                 <div class="field" id="lblSekolah"></div>
               </div>
@@ -102,6 +106,7 @@
                         $('#lblNama').text(r.nama);
                         $('#lblRole').text(r.usr_role=='Guru' || r.usr_role=='Ibu Bapa'? ('Peserta ' + r.pertandingan) : r.usr_role);//.text(r.prog_code!==''?('Peserta ' + r.pertandingan):'');
                         $('#lblSekolah').text(r.kodsekolah + ' | ' + r.namasekolah);
+                        $('#lblseries').text(r.series);
                         d3.selectAll('.welcome-text').remove();
                         d3.select('.welcome-me').append('div').attr('class','width-full welcome-text welcome align-center text-slide-out').attr('style',r.status_peserta===1?'background-color:800!important':'').text(r.status_peserta===1?'Penyertaan dibatalkan':'Selamat Datang');
                         d3.select('.welcome-me').append('div').attr('class','width-full welcome-text align-center text-slide-out').text(r.nama);
